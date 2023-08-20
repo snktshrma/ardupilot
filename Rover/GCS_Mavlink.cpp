@@ -153,6 +153,7 @@ void GCS_MAVLINK_Rover::send_rangefinder() const
 {
     float distance = 0;
     float voltage = 0;
+    float data = 0;
     bool got_one = false;
 
     // report smaller distance of all rangefinders
@@ -164,6 +165,7 @@ void GCS_MAVLINK_Rover::send_rangefinder() const
         if (!got_one ||
             s->distance() < distance) {
             distance = s->distance();
+            data = s->data();
             voltage = s->voltage_mv();
             got_one = true;
         }
@@ -176,6 +178,7 @@ void GCS_MAVLINK_Rover::send_rangefinder() const
     mavlink_msg_rangefinder_send(
         chan,
         distance,
+        data,
         voltage);
 }
 

@@ -401,6 +401,7 @@ void GCS_MAVLINK::send_distance_sensor(const AP_RangeFinder_Backend *sensor, con
         sensor->min_distance_cm(),               // minimum distance the sensor can measure in centimeters
         sensor->max_distance_cm(),               // maximum distance the sensor can measure in centimeters
         sensor->distance_cm(),                   // current distance reading
+        sensor->data(),                   // current data reading
         sensor->get_mav_distance_sensor_type(),  // type from MAV_DISTANCE_SENSOR enum
         instance,                                // onboard ID of the sensor == instance
         sensor->orientation(),                   // direction the sensor faces from MAV_SENSOR_ORIENTATION enum
@@ -410,6 +411,8 @@ void GCS_MAVLINK::send_distance_sensor(const AP_RangeFinder_Backend *sensor, con
         (const float *)nullptr,                  // quaternion of sensor orientation for MAV_SENSOR_ROTATION_CUSTOM
         quality);                                // Signal quality of the sensor. 0 = unknown/unset signal quality, 1 = invalid signal, 100 = perfect signal.
 }
+
+// hal.console->printf()
 // send any and all distance_sensor messages.  This starts by sending
 // any distance sensors not used by a Proximity sensor, then sends the
 // proximity sensor ones.
@@ -471,6 +474,7 @@ void GCS_MAVLINK::send_rangefinder() const
     mavlink_msg_rangefinder_send(
             chan,
             s->distance(),
+            s->data(),
             s->voltage_mv() * 0.001f);
 }
 
@@ -507,6 +511,7 @@ void GCS_MAVLINK::send_proximity()
                         dist_min,                                       // minimum distance the sensor can measure in centimeters
                         dist_max,                                       // maximum distance the sensor can measure in centimeters
                         (uint16_t)(dist_array.distance[i] * 100.0f),    // current distance reading
+                        1,
                         MAV_DISTANCE_SENSOR_LASER,                      // type from MAV_DISTANCE_SENSOR enum
                         PROXIMITY_SENSOR_ID_START + i,                  // onboard ID of the sensor
                         dist_array.orientation[i],                      // direction the sensor faces from MAV_SENSOR_ORIENTATION enum
@@ -528,6 +533,7 @@ void GCS_MAVLINK::send_proximity()
                 dist_min,                                                 // minimum distance the sensor can measure in centimeters
                 dist_max,                                                 // maximum distance the sensor can measure in centimeters
                 (uint16_t)(dist_up * 100.0f),                             // current distance reading
+                1,
                 MAV_DISTANCE_SENSOR_LASER,                                // type from MAV_DISTANCE_SENSOR enum
                 PROXIMITY_SENSOR_ID_START + PROXIMITY_MAX_DIRECTION + 1,  // onboard ID of the sensor
                 MAV_SENSOR_ROTATION_PITCH_90,                             // direction upwards

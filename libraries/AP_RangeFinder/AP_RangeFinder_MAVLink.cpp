@@ -31,6 +31,7 @@ void AP_RangeFinder_MAVLink::handle_msg(const mavlink_message_t &msg)
     if (packet.orientation == orientation()) {
         state.last_reading_ms = AP_HAL::millis();
         distance_cm = packet.current_distance;
+        data = packet.data;
         _max_distance_cm = packet.max_distance;
         _min_distance_cm = packet.min_distance;
         sensor_type = (MAV_DISTANCE_SENSOR)packet.type;
@@ -71,8 +72,10 @@ void AP_RangeFinder_MAVLink::update(void)
     if (AP_HAL::millis() - state.last_reading_ms > AP_RANGEFINDER_MAVLINK_TIMEOUT_MS) {
         set_status(RangeFinder::Status::NoData);
         state.distance_m = 0.0f;
+        state.data_m = 0.0f;
     } else {
         state.distance_m = distance_cm * 0.01f;
+        state.data_m = data;
         update_status();
     }
 }

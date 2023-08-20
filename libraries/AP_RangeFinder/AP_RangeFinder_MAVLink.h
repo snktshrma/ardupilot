@@ -43,6 +43,7 @@ private:
 
     // stored data from packet:
     uint16_t distance_cm;
+    uint16_t data;
     uint16_t _max_distance_cm;
     uint16_t _min_distance_cm;
 
