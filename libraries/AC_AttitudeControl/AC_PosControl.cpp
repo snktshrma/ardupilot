@@ -901,6 +901,20 @@ void AC_PosControl::update_pos_offset_z(float pos_offset_z)
         _jerk_max_z_cmsss, _dt, false);
 }
 
+void AC_PosControl::update_pos_offset_terrain_z(float pos_offset_z, float vel_offset)
+{
+    postype_t p_offset_z = _pos_offset_z;
+    update_pos_vel_accel(p_offset_z, _vel_offset_z, _accel_offset_z, _dt, MIN(_limit_vector.z, 0.0f), _p_pos_z.get_error(), _pid_vel_z.get_error());
+    _pos_offset_z = p_offset_z;
+
+    // input shape the terrain offset
+    shape_pos_vel_accel(pos_offset_z, vel_offset, 0.0f,
+        _pos_offset_z, _vel_offset_z, _accel_offset_z,
+        get_max_speed_down_cms(), get_max_speed_up_cms(),
+        -get_max_accel_z_cmss(), get_max_accel_z_cmss(),
+        _jerk_max_z_cmsss, _dt, false);
+}
+
 // is_active_z - returns true if the z position controller has been run in the previous 5 loop times
 bool AC_PosControl::is_active_z() const
 {

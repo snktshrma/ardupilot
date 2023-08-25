@@ -1,5 +1,8 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AC_WPNav.h"
+#include <GCS_MAVLink/GCS.h>
+
+#include <AP_RangeFinder/AP_RangeFinder_Backend.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -452,6 +455,12 @@ void AC_WPNav::get_wp_stopping_point(Vector3f& stopping_point) const
 }
 
 /// advance_wp_target_along_track - move target location along track from origin to destination
+float AC_WPNav::rangefinder_data() {
+    RangeFinder *rangefinder = RangeFinder::get_singleton();
+    AP_RangeFinder_Backend *sensor = rangefinder->get_backend(0);
+    return sensor->data();
+}
+
 bool AC_WPNav::advance_wp_target_along_track(float dt)
 {
     // calculate terrain adjustments
@@ -461,8 +470,10 @@ bool AC_WPNav::advance_wp_target_along_track(float dt)
     }
     const float offset_z_scaler = _pos_control.pos_offset_z_scaler(terr_offset, get_terrain_margin() * 100.0);
 
+    // GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Data_Value : %f", rangefinder_data());
     // input shape the terrain offset
-    _pos_control.update_pos_offset_z(terr_offset);
+    // _pos_control.update_pos_offset_z(terr_offset);
+    _pos_control.update_pos_offset_terrain_z(terr_offset,rangefinder_data());
 
     // get current position and adjust altitude to origin and destination's frame (i.e. _frame)
     const Vector3f &curr_pos = _inav.get_position_neu_cm() - Vector3f{0, 0, terr_offset};

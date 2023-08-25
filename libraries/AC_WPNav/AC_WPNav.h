@@ -209,6 +209,8 @@ public:
     /// advance_wp_target_along_track - move target location along track from origin to destination
     bool advance_wp_target_along_track(float dt);
 
+    float rangefinder_data() ;
+
     /// recalculate path with update speed and/or acceleration limits
     void update_track_with_speed_accel_limits();
 

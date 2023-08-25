@@ -226,6 +226,9 @@ public:
     /// update_pos_offset_z - updates the vertical offsets used by terrain following
     void update_pos_offset_z(float pos_offset);
 
+    /// update_pos_offset_terrain_z - updates the vertical offsets and velocity used by terrain following
+    void update_pos_offset_terrain_z(float pos_offset, float vel_offsetS);
+
     // is_active_z - returns true if the z position controller has been run in the previous 5 loop times
     bool is_active_z() const;
 
