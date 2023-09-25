@@ -192,6 +192,15 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
                     POSITION_TARGET_TYPEMASK_YAW_IGNORE| POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE; // ignore everything except velocity & acceleration
         target_accel = copter.mode_guided.get_target_accel() * 0.01f; // convert to metres/s/s
         break;
+
+    case ModeGuided::SubMode::PosVel:
+        type_mask = POSITION_TARGET_TYPEMASK_Z_IGNORE | POSITION_TARGET_TYPEMASK_VX_IGNORE | POSITION_TARGET_TYPEMASK_VY_IGNORE |
+                    POSITION_TARGET_TYPEMASK_AX_IGNORE | POSITION_TARGET_TYPEMASK_AY_IGNORE | POSITION_TARGET_TYPEMASK_AZ_IGNORE |
+                    POSITION_TARGET_TYPEMASK_YAW_IGNORE| POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE; 
+
+        target_pos = copter.mode_guided.get_target_pos().tofloat() * 0.01; // convert to metres
+        target_vel = copter.mode_guided.get_target_vel() * 0.01f; // convert to metres/s
+        break;
     }
 
     mavlink_msg_position_target_local_ned_send(
@@ -210,6 +219,7 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
         -target_accel.z,// afz in m/s/s NED frame
         0.0f, // yaw
         0.0f); // yaw_rate
+
 #endif
 }
 

@@ -94,6 +94,10 @@ void ModeGuided::run()
     case SubMode::Angle:
         angle_control_run();
         break;
+    
+    case SubMode::PosVel:
+        posvel_control_run();
+        break;
     }
  }
 
@@ -906,6 +910,49 @@ void ModeGuided::posvelaccel_control_run()
     attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
 }
 
+
+
+// posvel_control_run - runs the guided position, velocity and acceleration controller
+// called from guided_run
+void ModeGuided::posvel_control_run()
+{
+    // if not armed set throttle to zero and exit immediately
+    if (is_disarmed_or_landed()) {
+        // do not spool down tradheli when on the ground with motor interlock enabled
+        make_safe_ground_handling(copter.is_tradheli() && motors->get_interlock());
+        return;
+    }
+
+
+    // set motors to full range
+    motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
+
+    // send position and velocity targets to position controller
+    
+
+    // stop rotating if no updates received within timeout_ms
+    if (millis() - update_time_ms > get_timeout_ms()) {
+        guided_accel_target_cmss.zero();
+        guided_vel_target_cms.zero();
+        if ((auto_yaw.mode() == AutoYaw::Mode::RATE) || (auto_yaw.mode() == AutoYaw::Mode::ANGLE_RATE)) {
+            auto_yaw.set_mode(AutoYaw::Mode::HOLD);
+        }
+    }
+
+
+    pos_control->input_pos_xyz(guided_pos_target_cm, 0, 0);
+    pos_control->input_vel_accel_z(guided_vel_target_cms.z, guided_accel_target_cmss.z, false);
+
+    // run position controllers
+    pos_control->update_xy_controller();
+    pos_control->update_z_controller();
+
+    // call attitude controller with auto yaw
+    attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
+}
+
+
+
 // angle_control_run - runs the guided angle controller
 // called from guided_run
 void ModeGuided::angle_control_run()
@@ -1106,6 +1153,7 @@ int32_t ModeGuided::wp_bearing() const
     case SubMode::TakeOff:
     case SubMode::Accel:
     case SubMode::VelAccel:
+    case SubMode::PosVel:
     case SubMode::Angle:
         // these do not have bearings
         return 0;
@@ -1123,6 +1171,7 @@ float ModeGuided::crosstrack_error() const
     case SubMode::TakeOff:
     case SubMode::Accel:
     case SubMode::VelAccel:
+    case SubMode::PosVel:
     case SubMode::PosVelAccel:
         return pos_control->crosstrack_error();
     case SubMode::Angle:
