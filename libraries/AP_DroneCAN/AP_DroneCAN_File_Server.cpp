@@ -1,6 +1,15 @@
 #include <AP_Filesystem/AP_Filesystem.h>
 #include "AP_DroneCAN_File_Server.h"
 
+AP_DroneCAN_File_Server::AP_DroneCAN_File_Server(AP_DroneCAN &ap_dronecan, CanardInterface &canard_iface) :
+    _ap_dronecan(ap_dronecan),
+    _canard_iface(canard_iface)
+{}
+
+bool AP_DroneCAN_File_Server::init()
+{
+    return true;
+}
 
 AP_DroneCAN_File_Server::FileClient* AP_DroneCAN_File_Server::get_free_client(const uavcan_protocol_file_Path &path, uint8_t client_node_id)
 {
@@ -98,18 +107,47 @@ void AP_DroneCAN_File_Server::handle_write_request(const CanardRxTransfer& trans
 
 void AP_DroneCAN_File_Server::handle_read_request(const CanardRxTransfer& transfer, const uavcan_protocol_file_ReadRequest& req){
     uavcan_protocol_file_ReadResponse rsp;
-    int fd = AP::FS().open("@ROMFS/test.123", O_RDONLY, false);
-    if (fd<0) {
+
+    FileClient* client = get_free_client(req.path, transfer.source_node_id);
+    if (client == nullptr) {
+        // we don't have any free slots, respond with stream unavailable
+        rsp.error.value = ENOSR;
+        _read_server.respond(transfer, rsp);
+        return;
+    }
+
+
+    if (client->open_mode != O_RDONLY && client->fd >= 0) {
+        // file is not open for writing, reopen
+        AP::FS().close(client->fd);
+        client->fd = -1;
+    }
+
+    // Try opening the file
+    if (client->fd < 0) {
+        // make sure the path is null terminated
+        if (strnlen((const char*)req.path.path.data, req.path.path.len) == req.path.path.len) {
+            rsp.error.value = ENAMETOOLONG;
+            _read_server.respond(transfer, rsp);
+            return;
+        }
+        // open the file
+        client->fd = AP::FS().open((const char*)req.path.path.data, O_RDONLY);
+    }
+
+    // Check if we successfully opened the file
+    if (client->fd < 0) {
         if (errno != 0) {
             rsp.error.value = errno;
         } else {
-            rsp.error.value = fd;
+            rsp.error.value = client->fd;
         }
         _read_server.respond(transfer, rsp); 
         return;
     }
-    int ret = AP::FS().read(fd, rsp.data.data, req.path.path.len);
-    // int ret = AP::FS().read(fd, req.path.path.data, req.path.path.len);   // Giving const error
+
+    // int ret = AP::FS().read(fd, rsp.data.data, req.path.path.len);
+    int ret = AP::FS().read(client->fd, rsp.data.data, rsp.data.len);
     if (ret < 0) {
         if (errno != 0) {
             rsp.error.value = errno;
@@ -117,5 +155,9 @@ void AP_DroneCAN_File_Server::handle_read_request(const CanardRxTransfer& transf
             rsp.error.value = ret;
         }
     }
-    _read_server.respond(transfer, rsp);  
+    // if (ret < req.data.len) {
+    //     // we didn't write all the data
+    //     rsp.error.value = EAGAIN;
+    // }
+    _read_server.respond(transfer, rsp);
 }

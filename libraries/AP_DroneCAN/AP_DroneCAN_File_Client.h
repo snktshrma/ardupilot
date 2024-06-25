@@ -26,16 +26,17 @@ public:
 
     bool init(uint8_t _server_node_id);
 
-    bool open(const char *path, uint16_t mode);
+    int open(const char *path, uint16_t mode);
 
     // sends the write request to the server 
     bool write_async(uint8_t data[], uint16_t data_len, FileRequestCb *cb);
 
     // sends the read request to the server
-    bool read_async(uint16_t offset, uint16_t len, FileRequestCb *cb);
+    bool read_async(uavcan_protocol_file_Path path, uint16_t len, FileRequestCb *cb);
 
     // close the file
-    bool close();
+    void close_async(FileRequestCb *cb);
+    void stop_async(FileRequestCb *cb);
 
 private:
     HAL_Semaphore storage_sem;
@@ -47,6 +48,10 @@ private:
     Canard::ObjCallback<AP_DroneCAN_File_Client, uavcan_protocol_file_WriteResponse> file_wr_cb{this, &AP_DroneCAN_File_Client::handle_write_response};
     Canard::Client<uavcan_protocol_file_WriteResponse> _write_client{_canard_iface, file_wr_cb};;
 
+    void handle_read_response(const CanardRxTransfer& transfer, const uavcan_protocol_file_ReadResponse &msg);
+    Canard::ObjCallback<AP_DroneCAN_File_Client, uavcan_protocol_file_ReadResponse> file_rd_cb{this, &AP_DroneCAN_File_Client::handle_read_response};
+    Canard::Client<uavcan_protocol_file_ReadResponse> _read_client{_canard_iface, file_rd_cb};;
+
 
     FileRequestCb *file_request_cb;
 
@@ -55,6 +60,8 @@ private:
     uint32_t _total_transaction;
 
     bool is_opened;
+
+    bool is_incomplete;
 
     HAL_Semaphore _sem;
 };

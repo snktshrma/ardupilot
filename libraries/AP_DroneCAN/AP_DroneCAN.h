@@ -174,7 +174,7 @@ public:
     Canard::Publisher<uavcan_equipment_hardpoint_Command> relay_hardpoint{canard_iface};
 #endif
 
-    AP_DroneCAN_File_Client& get_file_client() { return _file_client; }
+    // AP_DroneCAN_File_Client& get_file_client() { return _file_client; }
 
 private:
     void loop(void);
