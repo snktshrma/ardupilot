@@ -140,6 +140,14 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("NTF_RT", 6, AP_DroneCAN, _notify_state_hz, 20),
 
+    // @Param: IO_SRV
+    // @DisplayName: File IO server node id
+    // @Description: Node id of the file IO server
+    // @Range: 0 250
+    // @Values: 0:Disabled,1-250:Enabled
+    // @User: Advanced
+    AP_GROUPINFO("IO_SRV", 24, AP_DroneCAN, _io_server_node, 0),
+
     // @Param: ESC_OF
     // @DisplayName: ESC Output channels offset
     // @Description: Offset for ESC numbering in DroneCAN ESC RawCommand messages. This allows for more efficient packing of ESC command messages. If your ESCs are on servo functions 5 to 8 and you set this parameter to 4 then the ESC RawCommand will be sent with the first 4 slots filled. This can be used for more efficient usage of CAN bandwidth
@@ -270,6 +278,9 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
 #endif
 #endif // AP_DRONECAN_SERIAL_ENABLED
 
+
+    
+
     // RLY_RT is index 23 but has to be above SER_EN so its not hidden
 
     AP_GROUPEND
@@ -282,7 +293,9 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
 AP_DroneCAN::AP_DroneCAN(const int driver_index) :
 _driver_index(driver_index),
 canard_iface(driver_index),
-_dna_server(*this, canard_iface, driver_index)
+_dna_server(*this, canard_iface, driver_index),
+_file_client(*this, canard_iface),
+_file_server(*this, canard_iface)
 {
     AP_Param::setup_object_defaults(this, var_info);
 
@@ -359,6 +372,19 @@ void AP_DroneCAN::init(uint8_t driver_index, bool enable_filters)
     //Start Servers
     if (!_dna_server.init(unique_id, uid_len, _dronecan_node)) {
         debug_dronecan(AP_CANManager::LOG_ERROR, "DroneCAN: Failed to start DNA Server\n\r");
+        return;
+    }
+
+    if (_io_server_node != 0) {
+        if (!_file_client.init(_io_server_node)) {
+            debug_dronecan(AP_CANManager::LOG_ERROR, "DroneCAN: Failed to start File Client\n\r");
+            return;
+        }
+    }
+
+
+    if (!_file_server.init()) {
+        debug_dronecan(AP_CANManager::LOG_ERROR, "DroneCAN: Failed to start File Server\n\r");
         return;
     }
 
