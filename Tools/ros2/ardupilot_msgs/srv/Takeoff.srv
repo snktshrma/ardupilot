@@ -3,7 +3,7 @@
 
 # alt : Set the takeoff altitude above home or above terrain(in case of rangefinder)
 
-uint8 alt
+float32 alt
 ---
 # status    : True if the request for mode switch was successful, False otherwise
 
