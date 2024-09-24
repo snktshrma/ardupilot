@@ -8,8 +8,8 @@ module ardupilot_msgs {
     struct Takeoff_Request {
       @verbatim (language="comment", text=
         "This service requests the vehicle to takeoff" "\n"
-        "alt : Set the takeoff altitude")
-      uint8 alt;
+        "float : Set the takeoff altitude [m] above home, or above terrain if rangefinder is healthy")
+      float alt;
     };
     @verbatim (language="comment", text=
       "status    : True if the request for takeoff was successful, False otherwise")

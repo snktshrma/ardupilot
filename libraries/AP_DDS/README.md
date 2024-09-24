@@ -259,8 +259,8 @@ ardupilot_msgs.srv.ModeSwitch_Response(status=True, curr_mode=4)
 Call the takeoff service:
 
 ```bash
-$ ros2 service call /ap/takeoff ardupilot_msgs/srv/takeoff "{alt: 10}"
-requester: making request: ardupilot_msgs.srv.Takeoff_Request(alt=10)
+$ ros2 service call /ap/takeoff ardupilot_msgs/srv/takeoff "{alt: 10.5}"
+requester: making request: ardupilot_msgs.srv.Takeoff_Request(alt=10.5)
 
 response:
 ardupilot_msgs.srv.Takeoff_Response(status=True)
