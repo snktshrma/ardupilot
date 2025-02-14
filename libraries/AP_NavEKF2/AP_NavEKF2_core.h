@@ -472,6 +472,7 @@ private:
         Vector2F    flowRadXYcomp;
         Vector3F    bodyRadXYZ;
         Vector3F    body_offset;
+        float       ground_distance;
         float       heightOverride;
     };
 
@@ -897,6 +898,7 @@ private:
     mag_elements magDataDelayed;    // Magnetometer data at the fusion time horizon
     gps_elements gpsDataNew;        // GPS data at the current time horizon
     gps_elements gpsDataDelayed;    // GPS data at the fusion time horizon
+    of_elements ofDataNew;          // Optical flow data at the current time horizon
     output_elements outputDataNew;  // output state data at the current time step
     output_elements outputDataDelayed; // output state data at the current time step
     Vector3F delAngCorrection;      // correction applied to delta angles used by output observer to track the EKF
@@ -1084,6 +1086,7 @@ private:
     bool takeOffDetected;           // true when takeoff for optical flow navigation has been detected
     ftype rngAtStartOfFlight;       // range finder measurement at start of flight
     uint32_t timeAtArming_ms;       // time in msec that the vehicle armed
+    ftype grndDistAtStartOfFlight;  // optical flow ground distance measurement at start of flight
 
     // baro ground effect
     ftype meaHgtAtTakeOff;            // height measured at commencement of takeoff

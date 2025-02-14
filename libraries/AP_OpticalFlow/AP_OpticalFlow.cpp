@@ -268,6 +268,7 @@ void AP_OpticalFlow::update_state(const OpticalFlow_state &state)
     AP::ahrs().writeOptFlowMeas(quality(),
                                 _state.flowRate,
                                 _state.bodyRate,
+                                _state.groundDistance,
                                 _last_update_ms,
                                 get_pos_offset(),
                                 get_height_override());
