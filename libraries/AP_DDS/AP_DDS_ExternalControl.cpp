@@ -11,9 +11,16 @@
 // These are the Goal Interface constants. Because microxrceddsgen does not expose
 // them in the generated code, they are manually maintained
 // Position ignore flags
-static constexpr uint16_t TYPE_MASK_IGNORE_LATITUDE = 1;
-static constexpr uint16_t TYPE_MASK_IGNORE_LONGITUDE = 2;
-static constexpr uint16_t TYPE_MASK_IGNORE_ALTITUDE = 4;
+// static constexpr uint16_t TYPE_MASK_IGNORE_LATITUDE = 1;
+// static constexpr uint16_t TYPE_MASK_IGNORE_LONGITUDE = 2;
+// static constexpr uint16_t TYPE_MASK_IGNORE_ALTITUDE = 4;
+
+// Typemask for Attitude Control
+// static constexpr uint8_t IGNORE_ROLL_RATE = 1;
+// static constexpr uint8_t IGNORE_PITCH_RATE = 2;
+// static constexpr uint8_t IGNORE_YAW_RATE = 4;
+// static constexpr uint8_t IGNORE_THRUST = 64;
+// static constexpr uint8_t IGNORE_ATTITUDE = 128;
 
 bool AP_DDS_External_Control::handle_global_position_control(ardupilot_msgs_msg_GlobalPosition& cmd_pos)
 {
@@ -32,9 +39,9 @@ bool AP_DDS_External_Control::handle_global_position_control(ardupilot_msgs_msg_
         }
 
         constexpr uint32_t MASK_POS_IGNORE =
-            TYPE_MASK_IGNORE_LATITUDE |
-            TYPE_MASK_IGNORE_LONGITUDE |
-            TYPE_MASK_IGNORE_ALTITUDE;
+            IGNORE_LATITUDE |
+            IGNORE_LONGITUDE |
+            IGNORE_ALTITUDE;
 
         if (!(cmd_pos.type_mask & MASK_POS_IGNORE)) {
             Location loc(cmd_pos.latitude * 1E7, cmd_pos.longitude * 1E7, alt_cm, alt_frame);
@@ -49,6 +56,47 @@ bool AP_DDS_External_Control::handle_global_position_control(ardupilot_msgs_msg_
     }
 
     return false;
+}
+
+bool AP_DDS_External_Control::handle_attitude_control(ardupilot_msgs_msg_AttitudeTarget& cmd_att)
+{
+    auto *external_control = AP::externalcontrol();
+    if (external_control == nullptr) {
+        return false;
+    }
+
+    const bool roll_rate_ignore   = cmd_att.type_mask & IGNORE_ROLL_RATE;
+    const bool pitch_rate_ignore  = cmd_att.type_mask & IGNORE_PITCH_RATE;
+    const bool yaw_rate_ignore    = cmd_att.type_mask & IGNORE_YAW_RATE;
+    const bool throttle_ignore    = cmd_att.type_mask & IGNORE_THRUST;
+    const bool attitude_ignore    = cmd_att.type_mask & IGNORE_ATTITUDE;
+
+    // thrust field should not be ignored
+    if (throttle_ignore) {
+        return false;
+    }
+
+    Quaternion attitude_quat;
+    if (attitude_ignore) {
+        attitude_quat.zero();
+    } else {
+        attitude_quat = Quaternion(cmd_att.orientation.w,cmd_att.orientation.x,cmd_att.orientation.y,cmd_att.orientation.z);
+        if (!attitude_quat.is_unit_length()) {
+            return false;
+        }
+    }
+
+    Vector3f ang_vel_body;
+    // Ensure the ang-vel vector is always populated
+    ang_vel_body.x = roll_rate_ignore ? 0.0f : cmd_att.body_rate.x;
+    ang_vel_body.y = pitch_rate_ignore ? 0.0f : cmd_att.body_rate.y;
+    ang_vel_body.z = yaw_rate_ignore ? 0.0f : cmd_att.body_rate.z;
+
+    if (roll_rate_ignore && pitch_rate_ignore && yaw_rate_ignore) {
+        return false; // TODO: Needs better handling
+    }
+
+    return external_control->set_attitude_target(attitude_quat, ang_vel_body, cmd_att.thrust);
 }
 
 bool AP_DDS_External_Control::handle_velocity_control(geometry_msgs_msg_TwistStamped& cmd_vel)
