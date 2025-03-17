@@ -159,6 +159,7 @@ private:
     float areaCd;
     float mass;
     float last_param_voltage;
+    uint64_t last_u = 0;
 #if AP_SIM_ENABLED
     Battery *battery;
 #endif

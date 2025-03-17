@@ -1,0 +1,2942 @@
+<?xml version="1.0" ?>
+<sdf version='1.10'>
+  <world name='empty'>
+    <physics name='1ms' type='ignored'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <plugin name='gz::sim::systems::Physics' filename='gz-sim-physics-system'/>
+    <plugin name='gz::sim::systems::UserCommands' filename='gz-sim-user-commands-system'/>
+    <plugin name='gz::sim::systems::SceneBroadcaster' filename='gz-sim-scene-broadcaster-system'/>
+    <plugin name='gz::sim::systems::Contact' filename='gz-sim-contact-system'/>
+    
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin
+      filename="gz-sim-logical-camera-system"
+      name="gz::sim::systems::LogicalCamera">
+      <render_engine>ogre2</render_engine>
+    </plugin> 
+    <plugin filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin filename="gz-sim-imu-system"
+      name="gz::sim::systems::Imu">
+    </plugin>
+    <plugin filename="gz-sim-navsat-system"
+      name="gz::sim::systems::NavSat">
+    </plugin>
+    
+    <gravity>0 0 -9.8000000000000007</gravity>
+    <magnetic_field>5.5644999999999998e-06 2.2875799999999999e-05 -4.2388400000000002e-05</magnetic_field>
+    <atmosphere type='adiabatic'/>
+    <scene>
+      <ambient>0.400000006 0.400000006 0.400000006 1</ambient>
+      <background>0.699999988 0.699999988 0.699999988 1</background>
+      <shadows>true</shadows>
+    </scene>
+    
+    
+    <spherical_coordinates>
+      <latitude_deg>-35.363262</latitude_deg>
+      <longitude_deg>149.165237</longitude_deg>
+      <elevation>584</elevation>
+      <heading_deg>0</heading_deg>
+      <surface_model>EARTH_WGS84</surface_model>
+    </spherical_coordinates>
+    
+    
+    
+    
+    
+    <model name="axes">
+      <static>1</static>
+      <link name="link">
+        <visual name="r">
+          <cast_shadows>0</cast_shadows>
+          <pose>5 0 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>10 0.01 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 0.8</ambient>
+            <diffuse>1 0 0 0.8</diffuse>
+            <emissive>1 0 0 0.8</emissive>
+            <specular>0.5 0.5 0.5 0.8</specular>
+          </material>
+        </visual>
+        <visual name="g">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 5 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 10 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 0.8</ambient>
+            <diffuse>0 1 0 0.8</diffuse>
+            <emissive>0 1 0 0.8</emissive>
+            <specular>0.5 0.5 0.5 0.8</specular>
+          </material>
+        </visual>
+        <visual name="b">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 0 5.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 0.01 10</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 1 0.8</ambient>
+            <diffuse>0 0 1 0.8</diffuse>
+            <emissive>0 0 1 0.8</emissive>
+            <specular>0.5 0.5 0.5 0.8</specular>
+          </material>
+        </visual>
+        <sensor name="navsat_sensor" type="navsat">
+          <always_on>1</always_on>
+          <update_rate>1</update_rate>
+        </sensor>
+      </link>
+    </model>
+
+    <include>
+      <uri>model://iris_with_gimbal_d1</uri>
+      <pose degrees="true">0 0 0.195 0 0 90</pose>
+    </include>
+    
+    <include>
+      <uri>model://iris_with_gimbal_d2</uri>
+      <pose degrees="true">2 0 0.195 0 0 90</pose>
+    </include>
+    
+    <include>
+      <uri>model://iris_with_gimbal_d3</uri>
+      <pose degrees="true">4 0 0.195 0 0 90</pose>
+    </include>
+    
+    <include>
+      <uri>model://iris_with_gimbal_d4</uri>
+      <pose degrees="true">6 0 0.195 0 0 90</pose>
+    </include>
+    
+
+    <model name='road'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-231.88768005371094 216.66136169433594 0.003436001949012335 0.0012536499944453448 0.0004682929915454802 1.6636499951890273</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100</name>
+      <pose>199.89824757790319 198.88741169855044 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_0</name>
+      <pose>199.55909757570981 99.053045157193651 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_1</name>
+      <pose>199.48899841308594 -0.74090081453323364 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_2</name>
+      <pose>199.32400512695312 -98.918746948242188 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_3</name>
+      <pose>199.23258483699294 -198.87887845080695 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_4</name>
+      <pose>99.302587760134983 -198.83485713625504 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_5</name>
+      <pose>99.381032185613222 -98.921523896350365 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_6</name>
+      <pose>99.65935547314254 0.91040707884813443 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_7</name>
+      <pose>100.88300323486328 99.076072692871094 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_8</name>
+      <pose>100.48899841308594 198.95994567871094 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_9</name>
+      <pose>0.7244887689744246 198.67002877332902 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_10</name>
+      <pose>0.90517498102537264 98.757020846719072 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_11</name>
+      <pose>0.70066791772842407 -1.1150699853897095 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_12</name>
+      <pose>0.57507249720290687 -100.97230100142876 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_13</name>
+      <pose>-0.14873999357223511 -200.666259765625 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_14</name>
+      <pose>-98.965824178345628 198.66715727893265 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_15</name>
+      <pose>-98.90782864376672 99.384592179781507 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_16</name>
+      <pose>-99.264025015067077 -0.46642794614187011 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_17</name>
+      <pose>-99.273063659667969 -100.33300018310547 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_18</name>
+      <pose>-99.884887443429506 -200.25436131457218 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_19</name>
+      <pose>-198.89167872819709 198.54117686682847 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_20</name>
+      <pose>-198.78644444019096 98.694700877368419 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_21</name>
+      <pose>-199.21794651663188 -1.0885029286340782 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_22</name>
+      <pose>-199.25599891434632 -100.87944822064355 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/grasspatch_100</uri>
+      <name>grasspatch_100_23</name>
+      <pose>-199.46876839468698 -200.76465425660587 0 0 0 0</pose>
+    </include>
+    <model name='road_1'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-187.81034208198903 -201.11428243135541 6.9388939039072284e-18 0 0 1.5884700791016029</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_2'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-189.61780985956838 -101.11584417923608 6.9388939039072284e-18 0 0 1.5884700791016029</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_3'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-152.47034786520192 -24.210747315328462 2.4693799782760095e-10 0.00028700801366582422 0.0013071300213615873 0.66647700042759539</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_4'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-115.16532562893394 54.316299329285002 0.0027088799979537725 0.0012070600549563193 0.00057789000842161612 1.5746199877664395</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_5'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-115.11721263398985 18.515613175912925 0.0027088799979537725 0.0012070600549563193 0.00057789000842161612 1.5746199877664395</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_6'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-22.685263390036035 60.372658135693349 0.0027088799979537725 0.0012070600549563193 0.00057789000842161612 1.5746199877664395</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_7'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-22.588631948403386 18.927008527924386 0.0027088799979537725 0.0012070600549563193 0.00057789000842161612 1.5746199877664395</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_8'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-68.426176314460676 -27.429842105370533 0.0027088799979537101 -0.00058424998011437313 0.0012039900066826163 -0.001451889980868331</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_10'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-41.152026085067838 -83.999431660561086 0.0027088799979537725 -0.00081478001015788427 0.0010616399914485449 -0.20425600024224674</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_11'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>51.191162453994508 -108.98113385016481 0.002708879997953835 -0.0009407450233629163 0.00095181105870481314 -0.32921700817840643</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_12'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>142.90260013709957 -145.46448238834412 0.0027088799979537101 -0.0010283900344942561 0.00085636402320417326 -0.42608499379626674</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_13'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>220.14349001756682 -201.92856753011523 0.0027088799979536893 -0.0012829499990571066 0.00038077503550353666 -0.83194901269426413</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_14'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>17.871465744909628 95.420580769456649 0.0027088799979537725 0.00027610703544366611 0.0013094700540805383 0.65814203244173231</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_15'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>81.93062941816288 144.99968310114832 0.0027088799979537725 0.00027610703544366611 0.0013094700540805383 0.65814203244173231</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_17'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>100 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>223.04474318949053 129.77783142598796 -0.043128099292516771 -0.0012848500141161841 -0.00037431994974670139 -1.4039499864475655</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_9'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-44.043845005631468 105.60593432718095 -0.0049198698252438944 -0.00059516898984128964 0.0011986299788154257 -0.010541000485189174</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_18'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-79.73865115739676 124.42062153995265 -0.0049198698252439499 -0.0013133800179636144 0.00025684399505205712 -0.92733798297809222</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_19'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-104.36946535523072 122.93015963519389 -0.0049198698252440054 -0.00077655997879471565 -0.0010899100412654539 -2.0721800621794526</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_20'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-80.615695509475998 166.15079736421049 -0.0049198698252440054 -0.00077655997879471565 -0.0010899100412654539 -2.0721800621794526</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_21'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-52.329343411103608 204.76412585967165 -0.0049198698252439707 -0.00047220901445096789 -0.0012521899838132638 -2.3306299694402339</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_22'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-13.304231606097609 229.61336933912617 -0.0049198698252439499 0.00016471099364131312 -0.0013280900209642057 -2.8146399954527026</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_16'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>142.74683151908101 182.43034715079705 -0.0049198698252439499 0.00016471099364131312 -0.0013280900209642057 -2.8146399954527026</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_23'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>190.33145813995051 183.98324923843927 -0.0049198698252439499 0.0008449369634454312 -0.001037799968342284 2.90861999901067</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='road_24'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>50 8 0.10000000000000001</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.200000003 0.200000003 0.200000003 1</ambient>
+            <diffuse>0.200000003 0.200000003 0.200000003 1</diffuse>
+            <specular>0.100000001 0.100000001 0.100000001 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0.050000000000000003 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>5</mass>
+          <inertia>
+            <ixx>0.10000000000000001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.10000000000000001</iyy>
+            <iyz>0</iyz>
+            <izz>0.10000000000000001</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>-88.05552832648047 -48.050393900028652 -0.0049198698252438944 0.0012536499944453448 0.0004682929915454802 1.6636499951890273</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree</name>
+      <pose>-177.43554768883334 -243.82809190108088 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_0</name>
+      <pose>-177.29577469149552 -233.71155412544863 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_1</name>
+      <pose>-177.2249318906353 -225.33281370105291 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_2</name>
+      <pose>-177.21190462661829 -217.32606647960876 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_3</name>
+      <pose>-177.11629275985757 -209.49309031941578 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_4</name>
+      <pose>-176.83402842361241 -202.50386321459209 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_5</name>
+      <pose>-176.82229234507085 -194.67190804858123 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_6</name>
+      <pose>-177.26213746632416 -185.11395814857411 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_7</name>
+      <pose>-177.574735651683 -175.54784716967248 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_8</name>
+      <pose>-178.3144647300081 -165.99219047771976 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_9</name>
+      <pose>-178.41081695668871 -156.69433649181315 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_10</name>
+      <pose>-178.80589140174285 -145.85696981541369 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_11</name>
+      <pose>-179.21664331065367 -136.00519155771929 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_12</name>
+      <pose>-178.45744141927543 -128.16352679839977 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_13</name>
+      <pose>-168.20818815609266 -244.40134408883983 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_14</name>
+      <pose>-167.88183023124316 -234.40241461749451 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_15</name>
+      <pose>-167.77430924558303 -225.06758609767866 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_16</name>
+      <pose>-167.34482860704804 -216.36500629510635 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_17</name>
+      <pose>-167.34844462657972 -207.23142734928146 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_18</name>
+      <pose>-167.0890335009407 -197.61608574265404 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_19</name>
+      <pose>-167.71704825876765 -187.35022172570294 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_20</name>
+      <pose>-155.49659318446854 -241.70712713556537 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_21</name>
+      <pose>-141.53230903552011 -240.6081798655884 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_22</name>
+      <pose>-128.0396749973533 -241.0341757039908 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_23</name>
+      <pose>-112.16564100259167 -240.8682143194157 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_24</name>
+      <pose>-95.663786113205362 -240.25956883136132 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_25</name>
+      <pose>-156.22045208165724 -230.47438944867801 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_26</name>
+      <pose>-142.54144116010872 -230.46021616477259 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_27</name>
+      <pose>-129.21842609836591 -228.95128907936035 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_28</name>
+      <pose>-113.41521692344236 -229.65823708177541 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_29</name>
+      <pose>-98.033242750628574 -227.05959177773269 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_30</name>
+      <pose>-98.473089872749611 -211.63309014366871 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_31</name>
+      <pose>-114.0366298852596 -212.00759903145081 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_32</name>
+      <pose>-129.42493334863929 -212.80086412120076 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_33</name>
+      <pose>-108.0432904414467 -197.97446549218583 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_34</name>
+      <pose>-123.75830937406353 -198.68138360745681 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_35</name>
+      <pose>-98.027933249186731 -186.04753523206097 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_36</name>
+      <pose>-120.24678646255867 -185.8454789219885 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_37</name>
+      <pose>-132.86853402600849 -185.82671285005515 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_38</name>
+      <pose>-110.11924470315159 -172.11487326462503 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_39</name>
+      <pose>-127.34914767179339 -171.95109888653099 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_40</name>
+      <pose>-95.957710564514727 -162.71041872864689 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_41</name>
+      <pose>-120.07557617348215 -161.81945398960252 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_42</name>
+      <pose>-133.10275840304075 -160.90792419952416 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_43</name>
+      <pose>-142.03529789736865 -149.93536045650586 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_44</name>
+      <pose>-142.50153541154626 -133.35519929444652 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_45</name>
+      <pose>-132.81095610912749 -121.47053779623459 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_46</name>
+      <pose>-86.922721374298419 -144.48873837787517 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_47</name>
+      <pose>-90.791407418109699 -129.48220687279718 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_48</name>
+      <pose>-102.02241672919773 -119.73668856343525 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_49</name>
+      <pose>-118.19897203187118 -120.54923212342138 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_50</name>
+      <pose>-113.97021880032838 -138.05539194392099 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_51</name>
+      <pose>-127.18049639544542 -146.00671230727707 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_52</name>
+      <pose>-106.123821262823 -150.89764791987596 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_53</name>
+      <pose>-127.19227857871351 -132.03485017025264 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_54</name>
+      <pose>-56.63933003450019 -68.380178482454625 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_55</name>
+      <pose>-40.525448229917338 -71.233584699578813 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_56</name>
+      <pose>-19.75112407272627 -74.723054946528549 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_57</name>
+      <pose>1.7269022975733535 -79.669783171799452 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_58</name>
+      <pose>22.634498068782346 -85.958498724642908 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_59</name>
+      <pose>48.889652872555843 -94.269951940098764 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_60</name>
+      <pose>73.061335411635355 -101.92814314577588 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_61</name>
+      <pose>102.37218932024588 -112.89202980083185 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_62</name>
+      <pose>120.3340651953919 -120.53874918251699 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_63</name>
+      <pose>142.48479262018239 -121.36959830765716 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_64</name>
+      <pose>160.38711869914994 -111.33736096350991 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_65</name>
+      <pose>181.37098968233533 -96.314226205128335 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_66</name>
+      <pose>163.66418006862472 -95.514808454644395 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_67</name>
+      <pose>146.45307282793698 -108.58510181311422 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_68</name>
+      <pose>130.14975048437162 -114.12912416794823 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_69</name>
+      <pose>111.81517099810878 -110.17777338897223 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_70</name>
+      <pose>93.886566147762068 -104.80142562507636 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_71</name>
+      <pose>60.507813220233487 -91.932958530317435 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_72</name>
+      <pose>37.609044553987417 -83.148161416241521 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_73</name>
+      <pose>15.695369831984483 -76.5022613969047 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_74</name>
+      <pose>-8.615800730723155 -69.282311246235565 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_75</name>
+      <pose>-32.042410422925201 -65.138629524173354 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_76</name>
+      <pose>-49.266446732096071 -63.752689711963576 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_77</name>
+      <pose>-101.15513845981678 -8.857563476566547 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_78</name>
+      <pose>-101.49931201220508 4.7755946534596561 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_79</name>
+      <pose>-101.32514319354698 20.580813556116109 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_80</name>
+      <pose>-101.09294133487134 38.127653619934719 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_81</name>
+      <pose>-101.17790348864521 55.136245075854177 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_82</name>
+      <pose>-101.91849808557573 75.857397847499925 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_83</name>
+      <pose>-62.444198537125189 235.02919219520524 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_84</name>
+      <pose>-79.763561184390682 235.76591914360662 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_85</name>
+      <pose>-94.820726562508128 236.11541781809694 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_86</name>
+      <pose>-70.117764400505919 220.29477772824677 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_87</name>
+      <pose>-80.071478413944916 206.10486900728353 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_88</name>
+      <pose>-89.03196021983976 192.03741919190617 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_89</name>
+      <pose>-98.913454778249843 178.67933626176281 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_90</name>
+      <pose>-107.9951878973354 235.98229119719653 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_91</name>
+      <pose>-85.032033857783432 224.00361457861976 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_92</name>
+      <pose>-100.92169500471255 224.45681908902964 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_93</name>
+      <pose>-93.93476697160105 212.5004733355542 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_94</name>
+      <pose>-116.92668909343261 225.42880790168215 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_95</name>
+      <pose>-109.90309061860191 215.08657226521731 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_96</name>
+      <pose>-105.03832601386728 200.50327626371723 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_97</name>
+      <pose>-107.96784989152917 190.13972046825299 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_98</name>
+      <pose>-106.06392567552001 166.13663807838199 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_99</name>
+      <pose>-115.26187634606519 179.26438936361313 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_100</name>
+      <pose>-114.04754487191649 152.77502871160254 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_101</name>
+      <pose>-121.88112187030853 168.39288285852609 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_102</name>
+      <pose>-123.42334783597227 140.783869634974 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_103</name>
+      <pose>-130.09555359460163 156.89804036304753 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_104</name>
+      <pose>-134.72845849080798 127.3776844068672 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_105</name>
+      <pose>-139.79817174989756 145.04950396640672 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_106</name>
+      <pose>-147.80954080854207 159.6479240299785 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_107</name>
+      <pose>-157.98610490560193 151.97741248070906 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_108</name>
+      <pose>-149.96098805817334 137.42910766056329 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_109</name>
+      <pose>-145.83631922455584 116.52885350014202 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_110</name>
+      <pose>-163.19459093802465 122.40685082755782 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_111</name>
+      <pose>-165.89399408859913 142.94048205815682 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_112</name>
+      <pose>-177.32972420889848 132.12470604835181 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_113</name>
+      <pose>-160.71273557469775 105.02115578194767 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_114</name>
+      <pose>-190.09227734374059 122.59251375108414 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_115</name>
+      <pose>-156.70189966238496 130.2214133036932 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_116</name>
+      <pose>-173.26998575173624 114.94405779393239 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_117</name>
+      <pose>-175.9652606988621 96.429754507207335 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_118</name>
+      <pose>-161.682500883041 90.732687017219916 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_119</name>
+      <pose>-175.68341853552647 77.472903220046703 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_120</name>
+      <pose>-188.24295013558194 108.37106980666384 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_121</name>
+      <pose>-201.90534087487336 118.16888889172314 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_122</name>
+      <pose>-195.23096722297507 96.107060690349101 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_123</name>
+      <pose>-187.89066835951112 83.397689400537899 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_124</name>
+      <pose>-207.62070376947213 110.34507728726031 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_125</name>
+      <pose>-214.53238993443281 98.531118220780584 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_126</name>
+      <pose>-203.54406686638481 83.538171189012203 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_127</name>
+      <pose>-190.24502945745098 62.60947772021823 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_128</name>
+      <pose>-203.15022557140128 70.012263779143623 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_129</name>
+      <pose>-216.49846566229328 85.980653599142457 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_130</name>
+      <pose>124.11149630508568 136.20992797779192 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_131</name>
+      <pose>135.8188687462515 124.68267489628929 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_132</name>
+      <pose>142.29908481662181 103.91702168119896 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_133</name>
+      <pose>104.52940916153668 124.37434925100692 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_134</name>
+      <pose>116.5098230805597 111.27149871726246 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_135</name>
+      <pose>129.42455958884182 92.211059104212637 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_136</name>
+      <pose>159.70967957965962 115.51005082519062 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_137</name>
+      <pose>116.80649990281961 80.111236251722971 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_138</name>
+      <pose>103.25255715174688 98.470286155951698 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_139</name>
+      <pose>91.182764197688968 111.59796724742364 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_140</name>
+      <pose>92.59577965732754 87.103693735212033 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_141</name>
+      <pose>99.800496984556787 71.006767168212107 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_142</name>
+      <pose>79.859776270359532 101.4024491327514 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_143</name>
+      <pose>67.651878785869599 91.188251615835398 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_144</name>
+      <pose>76.405272522819018 76.364577645833677 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_145</name>
+      <pose>84.0528870135212 61.97293597758933 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_146</name>
+      <pose>54.258972277671653 81.686558823918304 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_147</name>
+      <pose>61.164306860987374 67.088226048159342 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_148</name>
+      <pose>69.510243618531405 50.735668039382141 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_149</name>
+      <pose>39.415624960180224 71.552068911619799 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_150</name>
+      <pose>48.266740717568126 58.350291250738145 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_151</name>
+      <pose>58.392206034664113 42.453447366194737 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_152</name>
+      <pose>25.730165518806306 62.672807893628686 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_153</name>
+      <pose>34.961943233039641 49.377595327094234 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_154</name>
+      <pose>43.894695645145077 35.922668319712336 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_155</name>
+      <pose>13.417686256928103 51.825498369384206 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_156</name>
+      <pose>23.744181428990693 40.17532406750523 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_157</name>
+      <pose>30.768098219223404 28.591476460306147 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_158</name>
+      <pose>9.2890878295085493 38.728158913911813 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_159</name>
+      <pose>17.917961030650019 28.977083610049107 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_160</name>
+      <pose>117.73185056087596 66.018773912461839 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_161</name>
+      <pose>100.43299743586589 45.952038423352555 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_162</name>
+      <pose>85.233585342065425 35.801921751950317 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_163</name>
+      <pose>65.072517973892246 29.830841427308883 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Pine Tree</uri>
+      <name>Pine Tree_164</name>
+      <pose>48.983211695894397 26.38026785741048 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/apartment</uri>
+      <name>apartment</name>
+      <pose>-69.498040155078328 42.606440008717641 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/apartment</uri>
+      <name>apartment_0</name>
+      <pose>25.931106959888197 -34.938226228918211 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Casual female</uri>
+      <name>casual_female</name>
+      <pose>12.092711854416091 -27.92144667803527 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Scrubs</uri>
+      <name>Scrubs</name>
+      <pose>11.714599609375 -29.723699569702148 0 0 0 1.4986506490167522</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Scrubs</uri>
+      <name>Scrubs_0</name>
+      <pose>11.661999702453613 -43.263900756835938 0 0 0 1.1167349341800015</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Casual female</uri>
+      <name>casual_female_0</name>
+      <pose>11.872069153911021 -41.490325906840681 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Scrubs</uri>
+      <name>Scrubs_1</name>
+      <pose>13.383399963378906 -43.2239990234375 0 0 0 2.4915691297671114</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Mud Box</uri>
+      <name>mud_box</name>
+      <pose>27.4203203127107 -35.611354925767486 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Casual female</uri>
+      <name>casual_female_1</name>
+      <pose>10.629302024841309 -28.642370223999023 0 0 0 0.80257501518962637</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Mud Box</uri>
+      <name>mud_box_0</name>
+      <pose>-67.795200491294636 41.094521829460817 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Casual female</uri>
+      <name>casual_female_2</name>
+      <pose>-84.004278494085924 45.270913104556065 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Scrubs</uri>
+      <name>Scrubs_2</name>
+      <pose>-85.067298889160156 44.155601501464844 0 0 0 0.94397802081269566</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Scrubs</uri>
+      <name>Scrubs_3</name>
+      <pose>-79.054337242749995 39.664694872632246 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/Scrubs</uri>
+      <name>Scrubs_4</name>
+      <pose>-82.802497863769531 43.756401062011719 0 0 0 3.0295858542211533</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m</name>
+      <pose>-59.118675231933594 219.1097412109375 0 0 0 0.93486101055870419</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_0</name>
+      <pose>-82.566841125488281 185.35704040527344 0 0 0 1.0053799983078202</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_1</name>
+      <pose>-105.45911407470703 151.55279541015625 0 0 0 0.97335399258756461</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_2</name>
+      <pose>-126.8033447265625 118.08377838134766 0 0 0 1.002719953468175</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_3</name>
+      <pose>-138.68698120117188 80.458908081054688 0 0 0 1.559020007753529</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_4</name>
+      <pose>-138.9517822265625 39.666347503662109 0 0 0 1.5890799686133619</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_5</name>
+      <pose>-126.75099945068359 -58.514598846435547 0 0 0 -1.0259181051409356</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_6</name>
+      <pose>-98.525619506835938 -85.786178588867188 0 0 0 -0.46642299184243524</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_7</name>
+      <pose>-61.066326141357422 -100.90874481201172 0 0 0 -0.29134798444901061</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_8</name>
+      <pose>-20.900501251220703 -111.15604400634766 0 0 0 -0.19393199477254716</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_9</name>
+      <pose>16.41560173034668 -124.87862396240234 0 0 0 -0.50253399944839661</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_10</name>
+      <pose>45.928565979003906 -151.46012878417969 0 0 0 -0.96418400023062567</pose>
+    </include>
+    <include>
+      <uri>file:///home/rms3/my-local-models/bricked-wall-3m</uri>
+      <name>bricked-wall-3m_11</name>
+      <pose>57.230117797851562 -188.39788818359375 0 0 0 -1.5604999748154276</pose>
+    </include>
+    <light name='sun' type='directional'>
+      <pose>0 0 10 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1</intensity>
+      <direction>-0.5 0.10000000000000001 -0.90000000000000002</direction>
+      <diffuse>0.800000012 0.800000012 0.800000012 1</diffuse>
+      <specular>0.200000003 0.200000003 0.200000003 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <linear>0.01</linear>
+        <constant>0.90000000000000002</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>0</inner_angle>
+        <outer_angle>0</outer_angle>
+        <falloff>0</falloff>
+      </spot>
+    </light>
+  
+    <actor name='actor0_blue'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>-3.881461650310383 -20.93276748070917 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>-1.8814616503103831 -20.93276748070917 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>-1.8814616503103831 -20.93276748070917 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>-1.8814616503103831 -18.93276748070917 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>-1.8814616503103831 -18.93276748070917 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>-3.881461650310383 -18.93276748070917 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>-3.881461650310383 -18.93276748070917 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>-3.881461650310383 -20.93276748070917 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>-3.881461650310383 -20.93276748070917 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor1_green'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>-8.194578832926037 -20.435425145426635 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>-6.194578832926037 -20.435425145426635 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>-6.194578832926037 -20.435425145426635 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>-6.194578832926037 -18.435425145426635 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>-6.194578832926037 -18.435425145426635 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>-8.194578832926037 -18.435425145426635 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>-8.194578832926037 -18.435425145426635 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>-8.194578832926037 -20.435425145426635 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>-8.194578832926037 -20.435425145426635 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor2_green'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>14.6971669320063 -29.51840986602984 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>16.6971669320063 -29.51840986602984 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>16.6971669320063 -29.51840986602984 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>16.6971669320063 -27.51840986602984 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>16.6971669320063 -27.51840986602984 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>14.6971669320063 -27.51840986602984 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>14.6971669320063 -27.51840986602984 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>14.6971669320063 -29.51840986602984 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>14.6971669320063 -29.51840986602984 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor3_red'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>25.114674826994197 -28.904070364138903 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>27.114674826994197 -28.904070364138903 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>27.114674826994197 -28.904070364138903 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>27.114674826994197 -26.904070364138903 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>27.114674826994197 -26.904070364138903 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>25.114674826994197 -26.904070364138903 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>25.114674826994197 -26.904070364138903 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>25.114674826994197 -28.904070364138903 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>25.114674826994197 -28.904070364138903 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor4_red'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>22.272366570081616 -18.619704290842176 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>24.272366570081616 -18.619704290842176 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>24.272366570081616 -18.619704290842176 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>24.272366570081616 -16.619704290842176 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>24.272366570081616 -16.619704290842176 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>22.272366570081616 -16.619704290842176 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>22.272366570081616 -16.619704290842176 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>22.272366570081616 -18.619704290842176 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>22.272366570081616 -18.619704290842176 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor5_blue'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>5.161043557681506 -27.03259958741385 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>7.161043557681506 -27.03259958741385 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>7.161043557681506 -27.03259958741385 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>7.161043557681506 -25.03259958741385 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>7.161043557681506 -25.03259958741385 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>5.161043557681506 -25.03259958741385 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>5.161043557681506 -25.03259958741385 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>5.161043557681506 -27.03259958741385 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>5.161043557681506 -27.03259958741385 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor6_green'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>5.494002680944696 -25.129904052656087 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>7.494002680944696 -25.129904052656087 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>7.494002680944696 -25.129904052656087 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>7.494002680944696 -23.129904052656087 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>7.494002680944696 -23.129904052656087 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>5.494002680944696 -23.129904052656087 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>5.494002680944696 -23.129904052656087 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>5.494002680944696 -25.129904052656087 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>5.494002680944696 -25.129904052656087 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor7_green'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>27.557560609887275 -14.71294045300938 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>29.557560609887275 -14.71294045300938 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>29.557560609887275 -14.71294045300938 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>29.557560609887275 -12.71294045300938 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>29.557560609887275 -12.71294045300938 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>27.557560609887275 -12.71294045300938 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>27.557560609887275 -12.71294045300938 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>27.557560609887275 -14.71294045300938 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>27.557560609887275 -14.71294045300938 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor8_blue'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>14.814148004601574 -26.19740105600811 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>16.814148004601574 -26.19740105600811 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>16.814148004601574 -26.19740105600811 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>16.814148004601574 -24.19740105600811 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>16.814148004601574 -24.19740105600811 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>14.814148004601574 -24.19740105600811 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>14.814148004601574 -24.19740105600811 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>14.814148004601574 -26.19740105600811 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>14.814148004601574 -26.19740105600811 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name='actor9_blue'>
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id='0' type='walk'>
+<waypoint>
+            <time>0</time>
+            <pose>8.666981750928674 -26.979109574330902 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>10.666981750928674 -26.979109574330902 1 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>10.666981750928674 -26.979109574330902 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>10.666981750928674 -24.979109574330902 1 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>10.666981750928674 -24.979109574330902 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>8.666981750928674 -24.979109574330902 1 0 0 -3.1411853071795868</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>8.666981750928674 -24.979109574330902 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>8.666981750928674 -26.979109574330902 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>8.666981750928674 -26.979109574330902 1 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+</world>
+</sdf>

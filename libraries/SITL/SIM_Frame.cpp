@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
+const AP_HAL::HAL& hall = AP_HAL::get_HAL();
+
 using namespace SITL;
 
 static Motor quad_plus_motors[] =
@@ -702,7 +704,13 @@ void Frame::current_and_voltage(float &voltage, float &current)
         battery->init_voltage(param_voltage);
         last_param_voltage = param_voltage;
     }
-    voltage = battery->get_voltage();
+    if (!hall.util->get_soft_armed()) {
+        last_u = AP_HAL::micros64();
+        // float dt = (now - last_us) * 1.0e-6;
+    }
+    uint64_t now = AP_HAL::micros64();
+    float dt = (now - last_u) * 1.0e-6;
+    voltage = battery->get_voltage() - dt*0.00173;
     current = 0;
     for (uint8_t i=0; i<num_motors; i++) {
         current += motors[i].get_current();
