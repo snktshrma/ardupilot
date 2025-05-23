@@ -684,6 +684,12 @@ class ChibiOSHWDef(hwdef.HWDef):
             line = "0"
         return line
 
+    def disable_can(self, f):
+        '''setup for a non-CAN enabled board'''
+        f.write("#define HAL_NUM_CAN_IFACES 0\n")
+        f.write("#undef HAL_ENABLE_DRONECAN_DRIVERS\n")
+        f.write("#define HAL_ENABLE_DRONECAN_DRIVERS 0\n")
+
     def enable_can(self, f):
         '''setup for a CAN enabled board'''
         if self.mcu_series.startswith("STM32H7") or self.mcu_series.startswith("STM32G4"):
@@ -949,7 +955,6 @@ class ChibiOSHWDef(hwdef.HWDef):
 #define STM32_ETH_BUFFERS_EXTERN
 
 ''')
-
         defines = self.get_mcu_config('DEFINES', False)
         if defines is not None:
             for d in defines.keys():
@@ -1011,6 +1016,8 @@ class ChibiOSHWDef(hwdef.HWDef):
 
         if self.have_type_prefix('CAN') and not using_chibios_can:
             self.enable_can(f)
+        else:
+            self.disable_can(f)
         flash_size = self.get_config('FLASH_SIZE_KB', type=int)
         f.write('#define BOARD_FLASH_SIZE %u\n' % flash_size)
         self.env_vars['BOARD_FLASH_SIZE'] = flash_size
@@ -1057,6 +1064,8 @@ class ChibiOSHWDef(hwdef.HWDef):
                 # storage at end of flash - leave room
                 if offset > bl_offset:
                     flash_reserve_end = flash_size - offset
+            if self.is_bootloader_fw():
+                f.write('#define STORAGE_FLASH_START_PAGE %u\n' % storage_flash_page)
 
         crashdump_enabled = bool(self.intdefines.get('AP_CRASHDUMP_ENABLED', (flash_size >= 2048 and not self.is_bootloader_fw())))  # noqa
         # lets pick a flash sector for Crash log
@@ -1671,6 +1680,10 @@ INCLUDE common.ld
     def write_UART_config(self, f):
         '''write UART config defines'''
         serial_list = self.get_config('SERIAL_ORDER', required=False, aslist=True)
+        hide_iomcu_uart = False
+        if 'IOMCU_UART' in self.config:
+            hide_iomcu_uart = self.config['IOMCU_UART'][0] not in serial_list
+
         if 'IOMCU_UART' in self.config and self.config['IOMCU_UART'][0] not in serial_list:
             serial_list.append(self.config['IOMCU_UART'][0])
         if serial_list is None:
@@ -1682,10 +1695,16 @@ INCLUDE common.ld
         # write out which serial ports we actually have
         nports = 0
         for idx, serial in enumerate(serial_list):
+            if hide_iomcu_uart and self.config['IOMCU_UART'][0] == serial:
+                # IOMCU UART is not to be displayed in the serial parameters
+                f.write('#define HAL_HAVE_SERIAL%u 1\n' % idx)
+                f.write('#define HAL_HAVE_SERIAL%u_PARAMS 0\n' % idx)
+                continue
             if serial == 'EMPTY':
                 f.write('#define HAL_HAVE_SERIAL%u 0\n' % idx)
             else:
                 f.write('#define HAL_HAVE_SERIAL%u 1\n' % idx)
+                f.write('#define HAL_HAVE_SERIAL%u_PARAMS 1\n' % idx)
                 nports = nports + 1
         f.write('#define HAL_NUM_SERIAL_PORTS %u\n' % nports)
 
@@ -1710,7 +1729,7 @@ INCLUDE common.ld
                 self.error("Need io_firmware.bin in ROMFS for IOMCU")
 
             self.write_defaulting_define(f, 'HAL_WITH_IO_MCU', 1)
-            
+
             if self.config['IOMCU_UART'][0]:
                 # get index of serial port in serial_list
                 index = serial_list.index(self.config['IOMCU_UART'][0])
@@ -1719,7 +1738,7 @@ INCLUDE common.ld
                     '#define HAL_UART_IO_DRIVER constexpr ChibiOS::UARTDriver &uart_io = serial%sDriver;\n' % (index)
                 )
 
-            f.write('#define HAL_HAVE_SERVO_VOLTAGE 1\n') # make the assumption that IO gurantees servo monitoring
+            f.write('#define HAL_HAVE_SERVO_VOLTAGE 1\n') # make the assumption that IO guarantees servo monitoring
             # all IOMCU capable boards have SBUS out
             f.write('#define AP_FEATURE_SBUS_OUT 1\n')
         else:
@@ -1812,9 +1831,9 @@ INCLUDE common.ld
                 # USB endpoint ID, not used
                 f.write("0, ")
 
-                # Find and add RTS alt fuction number if avalable
+                # Find and add RTS alt function number if available
                 def get_RTS_alt_function():
-                    # Typicaly we do software RTS control, so there is
+                    # Typically we do software RTS control, so there is
                     # no requirement for the pin to have valid UART
                     # RTS alternative function
                     # If it does this enables hardware flow control for RS-485
@@ -2293,7 +2312,7 @@ INCLUDE common.ld
                 gpioset.add(gpio)
                 port = p.port
                 pin = p.pin
-                # aux config disabled by defualt
+                # aux config disabled by default
                 gpios.append((gpio, pwm, port, pin, p, 'false'))
         gpios = sorted(gpios)
         for (gpio, pwm, port, pin, p, enabled) in gpios:
@@ -2323,7 +2342,7 @@ INCLUDE common.ld
         this_dir = os.path.realpath(__file__)
         rootdir = os.path.relpath(os.path.join(this_dir, "../../../../.."))
         hwdef_dirname = os.path.basename(os.path.dirname(self.hwdef[0]))
-        # allow re-using of bootloader from different build:
+        # allow reusing of bootloader from different build:
         use_bootloader_from_board = self.get_config('USE_BOOTLOADER_FROM_BOARD', default=None, required=False)
         if use_bootloader_from_board is not None:
             hwdef_dirname = use_bootloader_from_board
@@ -2898,12 +2917,19 @@ Please run: Tools/scripts/build_bootloaders.py %s
             self.progress("Removing %s" % u)
             self.bytype.pop(u, '')
             self.bylabel.pop(u, '')
+            # remove alt config definitions
+            for alt in sorted(self.altmap.keys()):
+                for pp in sorted(self.altmap[alt].keys()):
+                    p = self.altmap[alt][pp]
+                    if p.portpin == u:
+                        del self.altmap[alt][pp]
+                        if p.label in self.altlabel.keys():
+                            del self.altlabel[p.label]
             self.alttype.pop(u, '')
-            self.altlabel.pop(u, '')
             for dev in self.spidev:
                 if u == dev[0]:
                     self.spidev.remove(dev)
-            # also remove all occurences of defines in previous lines if any
+            # also remove all occurrences of defines in previous lines if any
             for line in self.alllines[:]:
                 if line.startswith('STM32_') and u == line.split()[0]:
                     self.alllines.remove(line)

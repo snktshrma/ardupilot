@@ -25,7 +25,7 @@ else:
     running_python310 = True
 
 FIRMWARE_TYPES = ["AntennaTracker", "Copter", "Plane", "Rover", "Sub", "AP_Periph", "Blimp"]
-RELEASE_TYPES = ["beta", "beta-4.3", "latest", "stable", "stable-*", "dirty"]
+RELEASE_TYPES = ["beta", "latest", "stable", "stable-*", "dirty"]
 
 # mapping for board names to brand name and manufacturer
 brand_map = {
@@ -523,7 +523,7 @@ class ManifestGenerator():
                 tag = firstlevel
                 if not self.valid_release_type(tag):
                     print("Unknown tag (%s) in directory (%s)" %
-                          (tag, os.path.join(vdir)), file=sys.stderr)
+                          (tag, os.path.join(*vdir)), file=sys.stderr)
                     continue
                 tag_path = os.path.join(basedir, vehicletype, tag)
                 if not os.path.isdir(tag_path):

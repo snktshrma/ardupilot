@@ -40,12 +40,14 @@
 #include <AP_RCProtocol/AP_RCProtocol_config.h>
 #include "rc_in.h"
 #include "batt_balance.h"
+#include "battery_tag.h"
 #include "networking.h"
 #include "serial_options.h"
 #if AP_SIM_ENABLED
 #include <SITL/SITL.h>
 #endif
 #include <AP_AHRS/AP_AHRS.h>
+#include <AP_DAC/AP_DAC.h>
 
 #if AP_PERIPH_RELAY_ENABLED
 #if AP_PERIPH_PWM_HARDPOINT_ENABLED
@@ -73,19 +75,17 @@
 
 #include "esc_apd_telem.h"
 
-#if defined(HAL_PERIPH_NEOPIXEL_COUNT_WITHOUT_NOTIFY) || defined(HAL_PERIPH_ENABLE_NCP5623_LED_WITHOUT_NOTIFY) || defined(HAL_PERIPH_ENABLE_NCP5623_BGR_LED_WITHOUT_NOTIFY) || defined(HAL_PERIPH_ENABLE_TOSHIBA_LED_WITHOUT_NOTIFY)
-#define AP_PERIPH_HAVE_LED_WITHOUT_NOTIFY
-#endif
+#define AP_PERIPH_HAVE_LED_WITHOUT_NOTIFY (defined(HAL_PERIPH_NEOPIXEL_COUNT_WITHOUT_NOTIFY) || AP_PERIPH_NCP5623_LED_WITHOUT_NOTIFY_ENABLED || AP_PERIPH_NCP5623_BGR_LED_WITHOUT_NOTIFY_ENABLED || AP_PERIPH_TOSHIBA_LED_WITHOUT_NOTIFY_ENABLED)
 
 #if AP_PERIPH_NOTIFY_ENABLED
     #if !AP_PERIPH_RC_OUT_ENABLED && !defined(HAL_PERIPH_NOTIFY_WITHOUT_RCOUT)
         #error "AP_PERIPH_NOTIFY_ENABLED requires AP_PERIPH_RC_OUT_ENABLED"
     #endif
-    #ifdef HAL_PERIPH_ENABLE_BUZZER_WITHOUT_NOTIFY
-        #error "You cannot enable AP_PERIPH_NOTIFY_ENABLED and HAL_PERIPH_ENABLE_BUZZER_WITHOUT_NOTIFY at the same time. Notify already includes it"
+    #if AP_PERIPH_BUZZER_WITHOUT_NOTIFY_ENABLED
+        #error "You cannot enable AP_PERIPH_NOTIFY_ENABLED and AP_PERIPH_BUZZER_WITHOUT_NOTIFY_ENABLED at the same time. Notify already includes it"
     #endif
-    #ifdef AP_PERIPH_HAVE_LED_WITHOUT_NOTIFY
-        #error "You cannot enable AP_PERIPH_NOTIFY_ENABLED and any HAL_PERIPH_ENABLE_<device>_LED_WITHOUT_NOTIFY at the same time. Notify already includes them all"
+    #if AP_PERIPH_HAVE_LED_WITHOUT_NOTIFY
+        #error "You cannot enable AP_PERIPH_NOTIFY_ENABLED and any AP_PERIPH_<device>_LED_WITHOUT_NOTIFY_ENABLED at the same time. Notify already includes them all"
     #endif
     #ifdef HAL_PERIPH_NEOPIXEL_CHAN_WITHOUT_NOTIFY
         #error "You cannot use AP_PERIPH_NOTIFY_ENABLED and HAL_PERIPH_NEOPIXEL_CHAN_WITHOUT_NOTIFY at the same time. Notify already includes it. Set param OUTx_FUNCTION=120"
@@ -104,9 +104,13 @@
 #define HAL_PERIPH_CAN_MIRROR 0
 #endif
 
+#ifndef AP_SIM_PARAM_ENABLED
+#define AP_SIM_PARAM_ENABLED AP_SIM_ENABLED
+#endif
+
 #if defined(HAL_PERIPH_LISTEN_FOR_SERIAL_UART_REBOOT_CMD_PORT) && !defined(HAL_DEBUG_BUILD) && !defined(HAL_PERIPH_LISTEN_FOR_SERIAL_UART_REBOOT_NON_DEBUG)
 /* this checking for reboot can lose bytes on GPS modules and other
- * serial devices. It is really only relevent on a debug build if you
+ * serial devices. It is really only relevant on a debug build if you
  * really want it for non-debug build then define
  * HAL_PERIPH_LISTEN_FOR_SERIAL_UART_REBOOT_NON_DEBUG in hwdef.dat
  */
@@ -384,6 +388,10 @@ public:
     BattBalance battery_balance;
 #endif
 
+#if AP_PERIPH_BATTERY_TAG_ENABLED
+    BatteryTag battery_tag;
+#endif
+    
 #if AP_PERIPH_SERIAL_OPTIONS_ENABLED
     SerialOptions serial_options;
 #endif
@@ -553,6 +561,7 @@ public:
     void handle_lightscommand(CanardInstance* canard_instance, CanardRxTransfer* transfer);
     void handle_notify_state(CanardInstance* canard_instance, CanardRxTransfer* transfer);
     void handle_hardpoint_command(CanardInstance* canard_instance, CanardRxTransfer* transfer);
+    void handle_globaltime(CanardInstance* canard_instance, CanardRxTransfer* transfer);
 
     void process1HzTasks(uint64_t timestamp_usec);
     void processTx(void);
@@ -600,6 +609,10 @@ public:
 #endif
 #if AP_AHRS_ENABLED
     AP_AHRS ahrs;
+#endif
+
+#if AP_DAC_ENABLED
+    AP_DAC dac;
 #endif
 
     uint32_t reboot_request_ms = 0;

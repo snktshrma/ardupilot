@@ -12,8 +12,6 @@
 #endif
 #include <stdio.h>
 
-#define SENSOR_RATE_DEBUG 0
-
 #ifndef AP_HEATER_IMU_INSTANCE
 #define AP_HEATER_IMU_INSTANCE 0
 #endif
@@ -746,12 +744,6 @@ void AP_InertialSensor_Backend::log_accel_raw(uint8_t instance, const uint64_t s
 #endif
 }
 
-void AP_InertialSensor_Backend::_set_accel_max_abs_offset(uint8_t instance,
-                                                          float max_offset)
-{
-    _imu._accel_max_abs_offsets[instance] = max_offset;
-}
-
 // increment accelerometer error_count
 void AP_InertialSensor_Backend::_inc_accel_error_count(uint8_t instance)
 {
@@ -900,6 +892,13 @@ bool AP_InertialSensor_Backend::should_log_imu_raw() const
 void AP_InertialSensor_Backend::log_register_change(uint32_t bus_id, const AP_HAL::Device::checkreg &reg)
 {
 #if HAL_LOGGING_ENABLED
+// @LoggerMessage: IREG
+// @Description: IMU Register unexpected value change
+// @Field: TimeUS: Time since system startup
+// @Field: DevID: bus ID
+// @Field: Bank: device register bank
+// @Field: Reg: device register
+// @Field: Val: unexpected value
     AP::logger().Write("IREG", "TimeUS,DevID,Bank,Reg,Val", "QIBBB",
                        AP_HAL::micros64(),
                        bus_id,

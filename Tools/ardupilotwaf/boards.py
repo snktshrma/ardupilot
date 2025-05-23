@@ -5,9 +5,10 @@ import re
 import sys, os
 import fnmatch
 import platform
+import glob
 
 import waflib
-from waflib import Utils
+from waflib import Utils, Context
 from waflib.Configure import conf
 import json
 _board_classes = {}
@@ -84,19 +85,35 @@ class Board:
         if cfg.options.no_gcs:
             env.CXXFLAGS += ['-DHAL_GCS_ENABLED=0']
 
-        # configurations for XRCE-DDS
-        if cfg.options.enable_dds:
-            cfg.recurse('libraries/AP_DDS')
-            env.ENABLE_DDS = True
-            env.AP_LIBRARIES += [
-                'AP_DDS'
-            ]
-            env.DEFINES.update(AP_DDS_ENABLED = 1)
-            # check for microxrceddsgen
-            cfg.find_program('microxrceddsgen',mandatory=True)
+        # Setup DDS
+        if env.BOARD_CLASS == "ChibiOS" or env.BOARD_CLASS == "Linux":
+            # need to check the hwdef.h file for the board to see if dds is enabled
+            # the issue here is that we need to configure the env properly to include
+            # the DDS library, but the definition is the the hwdef file
+            # and can be overriden by the commandline options
+            with open(env.BUILDROOT + "/hwdef.h", 'r', encoding="utf8") as file:
+                if "#define AP_DDS_ENABLED 1" in file.read():
+                    # Enable DDS if the hwdef file has it enabled
+                    cfg.env.OPTIONS['enable_DDS'] = True
+                elif cfg.env.OPTIONS['enable_DDS']:
+                    # Add the define enabled if the hwdef file does not have it and the commandline option is set
+                    env.DEFINES.update(
+                        AP_DDS_ENABLED=1,
+                    )
+                else:
+                    # Add the define disabled if the hwdef file does not have it and the commandline option is not set
+                    env.DEFINES.update(
+                        AP_DDS_ENABLED=0,
+                    )
         else:
-            env.ENABLE_DDS = False
-            env.DEFINES.update(AP_DDS_ENABLED = 0)
+            if cfg.options.enable_DDS:
+                env.DEFINES.update(
+                    AP_DDS_ENABLED=1,
+                )
+            else:
+                env.DEFINES.update(
+                    AP_DDS_ENABLED=0,
+                )
 
         # setup for supporting onvif cam control
         if cfg.options.enable_onvif:
@@ -172,6 +189,17 @@ class Board:
             elif getattr(cfg.options, disable_option, False):
                 env.CXXFLAGS += ['-D%s=0' % opt.define]
                 cfg.msg("Enabled %s" % opt.label, 'no', color='YELLOW')
+
+        # support embedding lua drivers and applets
+        driver_list = glob.glob(os.path.join(Context.run_dir, "libraries/AP_Scripting/drivers/*.lua"))
+        applet_list = glob.glob(os.path.join(Context.run_dir, "libraries/AP_Scripting/applets/*.lua"))
+        for d in driver_list + applet_list:
+            bname = os.path.basename(d)
+            embed_name = bname[:-4]
+            embed_option = f"embed-{embed_name}".replace("-","_")
+            if getattr(cfg.options, embed_option, False):
+                env.ROMFS_FILES += [(f'scripts/{bname}', d)]
+                cfg.msg(f"Embedded {bname}", 'yes', color='GREEN')
 
         if cfg.options.disable_networking:
             env.CXXFLAGS += ['-DAP_NETWORKING_ENABLED=0']
@@ -277,7 +305,13 @@ class Board:
             want_version = cfg.options.assert_cc_version
             if have_version != want_version:
                 cfg.fatal("cc version mismatch: %s should be %s" % (have_version, want_version))
-        
+
+        # ensure that if you are using clang you're using it for both
+        # C and C++!
+        if (("clang" in cfg.env.COMPILER_CC and "clang" not in cfg.env.COMPILER_CXX) or
+            ("clang" not in cfg.env.COMPILER_CC and "clang" in cfg.env.COMPILER_CXX)):
+            cfg.fatal("Compiler mismatch; set CC and CXX to matching compilers (eg. CXX=clang++-19 CC=clang-19")
+
         if 'clang' in cfg.env.COMPILER_CC:
             env.CFLAGS += [
                 '-fcolor-diagnostics',
@@ -293,14 +327,6 @@ class Board:
             env.CFLAGS += [
                 '-Wno-format-contains-nul',
                 '-fsingle-precision-constant', # force const vals to be float , not double. so 100.0 means 100.0f
-            ]
-            if self.cc_version_gte(cfg, 7, 4):
-                env.CXXFLAGS += [
-                    '-Werror=implicit-fallthrough',
-                ]
-            env.CXXFLAGS += [
-                '-fsingle-precision-constant',
-                '-Wno-psabi',
             ]
 
         if cfg.env.DEBUG:
@@ -428,7 +454,9 @@ class Board:
         else:
             env.CXXFLAGS += [
                 '-Wno-format-contains-nul',
-                '-Werror=unused-but-set-variable'
+                '-Werror=unused-but-set-variable',
+                '-fsingle-precision-constant',
+                '-Wno-psabi',
             ]
             if self.cc_version_gte(cfg, 5, 2):
                 env.CXXFLAGS += [
@@ -526,6 +554,14 @@ class Board:
             env.CXXFLAGS += ['-DHAL_WITH_EKF_DOUBLE=0']
 
         if cfg.options.consistent_builds:
+            # if symbols are renamed we don't want them to affect the output:
+            env.CXXFLAGS += ['-fno-rtti']
+            env.CFLAGS += ['-fno-rtti']
+            # stop including a unique ID in the headers.  More useful
+            # when trying to find binary differences as the build-id
+            # appears to be a hash of the output products
+            # (ie. identical for identical compiler output):
+            env.LDFLAGS += ['-Wl,--build-id=bob']
             # squash all line numbers to be the number 17
             env.CXXFLAGS += [
                 "-D__AP_LINE__=17",
@@ -582,15 +618,15 @@ class Board:
 Board = BoardMeta('Board', Board.__bases__, dict(Board.__dict__))
 
 def add_dynamic_boards_chibios():
-    '''add boards based on existance of hwdef.dat in subdirectories for ChibiOS'''
+    '''add boards based on existence of hwdef.dat in subdirectories for ChibiOS'''
     add_dynamic_boards_from_hwdef_dir(chibios, 'libraries/AP_HAL_ChibiOS/hwdef')
 
 def add_dynamic_boards_linux():
-    '''add boards based on existance of hwdef.dat in subdirectories for '''
+    '''add boards based on existence of hwdef.dat in subdirectories for '''
     add_dynamic_boards_from_hwdef_dir(linux, 'libraries/AP_HAL_Linux/hwdef')
 
 def add_dynamic_boards_from_hwdef_dir(base_type, hwdef_dir):
-    '''add boards based on existance of hwdef.dat in subdirectory'''
+    '''add boards based on existence of hwdef.dat in subdirectory'''
     dirname, dirlist, filenames = next(os.walk(hwdef_dir))
     for d in dirlist:
         if d in _board_classes.keys():
@@ -600,7 +636,7 @@ def add_dynamic_boards_from_hwdef_dir(base_type, hwdef_dir):
             newclass = type(d, (base_type,), {'name': d})
 
 def add_dynamic_boards_esp32():
-    '''add boards based on existance of hwdef.dat in subdirectories for ESP32'''
+    '''add boards based on existence of hwdef.dat in subdirectories for ESP32'''
     dirname, dirlist, filenames = next(os.walk('libraries/AP_HAL_ESP32/hwdef'))
     for d in dirlist:
         if d in _board_classes.keys():
@@ -624,7 +660,7 @@ def is_board_based(board, cls):
     return issubclass(_board_classes[board], cls)
 
 def get_ap_periph_boards():
-    '''Add AP_Periph boards based on existance of periph keywork in hwdef.dat or board name'''
+    '''Add AP_Periph boards based on existence of periph keyword in hwdef.dat or board name'''
     list_ap = [s for s in list(_board_classes.keys()) if "periph" in s]
     dirname, dirlist, filenames = next(os.walk('libraries/AP_HAL_ChibiOS/hwdef'))
     for d in dirlist:
@@ -909,7 +945,7 @@ class sitl_periph(sitl):
             AP_AHRS_ENABLED = 1,
             AP_AHRS_BACKEND_DEFAULT_ENABLED = 0,
             AP_AHRS_DCM_ENABLED = 1,  # need a default backend
-            HAL_EXTERNAL_AHRS_ENABLED = 0,
+            AP_EXTERNAL_AHRS_ENABLED = 0,
 
             HAL_MAVLINK_BINDINGS_ENABLED = 1,
 
@@ -937,6 +973,38 @@ class sitl_periph(sitl):
             HAL_SUPPORT_RCOUT_SERIAL = 0,
             AP_TERRAIN_AVAILABLE = 0,
             AP_CUSTOMROTATIONS_ENABLED = 0,
+            AP_PERIPH_BATTERY_ENABLED = 0,
+            AP_PERIPH_DEVICE_TEMPERATURE_ENABLED = 0,
+            AP_PERIPH_SERIAL_OPTIONS_ENABLED = 0,
+            AP_PERIPH_ADSB_ENABLED = 0,
+            AP_PERIPH_PROXIMITY_ENABLED = 0,
+            AP_PERIPH_GPS_ENABLED = 0,
+            AP_PERIPH_RELAY_ENABLED = 0,
+            AP_PERIPH_IMU_ENABLED = 0,
+            AP_PERIPH_MAG_ENABLED = 0,
+            AP_PERIPH_BATTERY_BALANCE_ENABLED = 0,
+            AP_PERIPH_BATTERY_TAG_ENABLED = 0,
+            AP_PERIPH_MSP_ENABLED = 0,
+            AP_PERIPH_BARO_ENABLED = 0,
+            AP_PERIPH_EFI_ENABLED = 0,
+            AP_PERIPH_RANGEFINDER_ENABLED = 0,
+            AP_PERIPH_RC_OUT_ENABLED = 0,
+            AP_PERIPH_RTC_ENABLED = 0,
+            AP_PERIPH_RCIN_ENABLED = 0,
+            AP_PERIPH_RPM_ENABLED = 0,
+            AP_PERIPH_RPM_STREAM_ENABLED = 0,
+            AP_PERIPH_AIRSPEED_ENABLED = 0,
+            AP_PERIPH_HOBBYWING_ESC_ENABLED = 0,
+            AP_PERIPH_NETWORKING_ENABLED = 0,
+            AP_PERIPH_NOTIFY_ENABLED = 0,
+            AP_PERIPH_PWM_HARDPOINT_ENABLED = 0,
+            AP_PERIPH_ESC_APD_ENABLED = 0,
+            AP_PERIPH_NCP5623_LED_WITHOUT_NOTIFY_ENABLED = 0,
+            AP_PERIPH_NCP5623_BGR_LED_WITHOUT_NOTIFY_ENABLED = 0,
+            AP_PERIPH_TOSHIBA_LED_WITHOUT_NOTIFY_ENABLED = 0,
+            AP_PERIPH_BUZZER_ENABLED = 0,
+            AP_PERIPH_BUZZER_WITHOUT_NOTIFY_ENABLED = 0,
+            AP_PERIPH_RTC_GLOBALTIME_ENABLED = 0,
         )
 
         try:
@@ -955,36 +1023,24 @@ class sitl_periph_universal(sitl_periph):
             AP_PERIPH_GPS_ENABLED = 1,
             AP_PERIPH_AIRSPEED_ENABLED = 1,
             AP_PERIPH_MAG_ENABLED = 1,
-            AP_PERIPH_RELAY_ENABLED = 0,
             AP_PERIPH_BARO_ENABLED = 1,
             AP_PERIPH_IMU_ENABLED = 1,
             AP_PERIPH_RANGEFINDER_ENABLED = 1,
-            AP_PERIPH_DEVICE_TEMPERATURE_ENABLED = 0,
             AP_PERIPH_BATTERY_ENABLED = 1,
-            AP_PERIPH_BATTERY_BALANCE_ENABLED = 0,
             AP_PERIPH_EFI_ENABLED = 1,
             AP_PERIPH_RPM_ENABLED = 1,
             AP_PERIPH_RPM_STREAM_ENABLED = 1,
-            AP_PERIPH_PROXIMITY_ENABLED = 0,
             AP_RPM_STREAM_ENABLED = 1,
             AP_PERIPH_RC_OUT_ENABLED = 1,
             AP_PERIPH_ADSB_ENABLED = 1,
             AP_PERIPH_SERIAL_OPTIONS_ENABLED = 1,
             AP_AIRSPEED_ENABLED = 1,
             AP_BATTERY_ESC_ENABLED = 1,
-            AP_PERIPH_MSP_ENABLED =0,
             HAL_PWM_COUNT = 32,
             HAL_WITH_ESC_TELEM = 1,
             AP_EXTENDED_ESC_TELEM_ENABLED = 1,
             AP_TERRAIN_AVAILABLE = 1,
             HAL_GYROFFT_ENABLED = 0,
-            AP_PERIPH_HOBBYWING_ESC_ENABLED = 0,
-            AP_PERIPH_RTC_ENABLED = 0,
-            AP_PERIPH_RCIN_ENABLED = 0,
-            AP_PERIPH_NETWORKING_ENABLED = 0,
-            AP_PERIPH_NOTIFY_ENABLED = 0,
-            AP_PERIPH_PWM_HARDPOINT_ENABLED = 0,
-            AP_PERIPH_ESC_APD_ENABLED = 0,
         )
 
 class sitl_periph_gps(sitl_periph):
@@ -997,31 +1053,7 @@ class sitl_periph_gps(sitl_periph):
             CAN_APP_NODE_NAME = '"org.ardupilot.ap_periph_gps"',
             APJ_BOARD_ID = 101,
 
-            AP_PERIPH_BATTERY_ENABLED = 0,
-            AP_PERIPH_DEVICE_TEMPERATURE_ENABLED = 0,
-            AP_PERIPH_SERIAL_OPTIONS_ENABLED = 0,
-            AP_PERIPH_ADSB_ENABLED = 0,
-            AP_PERIPH_PROXIMITY_ENABLED = 0,
             AP_PERIPH_GPS_ENABLED = 1,
-            AP_PERIPH_RELAY_ENABLED = 0,
-            AP_PERIPH_IMU_ENABLED = 0,
-            AP_PERIPH_MAG_ENABLED = 0,
-            AP_PERIPH_BATTERY_BALANCE_ENABLED = 0,
-            AP_PERIPH_MSP_ENABLED = 0,
-            AP_PERIPH_BARO_ENABLED = 0,
-            AP_PERIPH_EFI_ENABLED = 0,
-            AP_PERIPH_RANGEFINDER_ENABLED = 0,
-            AP_PERIPH_RC_OUT_ENABLED = 0,
-            AP_PERIPH_RTC_ENABLED = 0,
-            AP_PERIPH_RCIN_ENABLED = 0,
-            AP_PERIPH_RPM_ENABLED = 0,
-            AP_PERIPH_RPM_STREAM_ENABLED = 0,
-            AP_PERIPH_AIRSPEED_ENABLED = 0,
-            AP_PERIPH_HOBBYWING_ESC_ENABLED = 0,
-            AP_PERIPH_NETWORKING_ENABLED = 0,
-            AP_PERIPH_NOTIFY_ENABLED = 0,
-            AP_PERIPH_PWM_HARDPOINT_ENABLED = 0,
-            AP_PERIPH_ESC_APD_ENABLED = 0,
         )
 
 class sitl_periph_battmon(sitl_periph):
@@ -1035,32 +1067,27 @@ class sitl_periph_battmon(sitl_periph):
             APJ_BOARD_ID = 101,
 
             AP_PERIPH_BATTERY_ENABLED = 1,
-            AP_PERIPH_DEVICE_TEMPERATURE_ENABLED = 0,
-            AP_PERIPH_SERIAL_OPTIONS_ENABLED = 0,
-            AP_PERIPH_BATTERY_BALANCE_ENABLED = 0,
-            AP_PERIPH_RELAY_ENABLED = 0,
-            AP_PERIPH_ADSB_ENABLED = 0,
-            AP_PERIPH_BARO_ENABLED = 0,
-            AP_PERIPH_RANGEFINDER_ENABLED = 0,
-            AP_PERIPH_PROXIMITY_ENABLED = 0,
-            AP_PERIPH_GPS_ENABLED = 0,
-            AP_PERIPH_MSP_ENABLED = 0,
-            AP_PERIPH_IMU_ENABLED = 0,
-            AP_PERIPH_MAG_ENABLED = 0,
-            AP_PERIPH_EFI_ENABLED = 0,
-            AP_PERIPH_RTC_ENABLED = 0,
-            AP_PERIPH_RC_OUT_ENABLED = 0,
-            AP_PERIPH_RCIN_ENABLED = 0,
-            AP_PERIPH_RPM_ENABLED = 0,
-            AP_PERIPH_RPM_STREAM_ENABLED = 0,
-            AP_PERIPH_AIRSPEED_ENABLED = 0,
-            AP_PERIPH_HOBBYWING_ESC_ENABLED = 0,
-            AP_PERIPH_NETWORKING_ENABLED = 0,
-            AP_PERIPH_NOTIFY_ENABLED = 0,
-            AP_PERIPH_PWM_HARDPOINT_ENABLED = 0,
-            AP_PERIPH_ESC_APD_ENABLED = 0,
         )
 
+class sitl_periph_battery_tag(sitl_periph):
+    def configure_env(self, cfg, env):
+        cfg.env.AP_PERIPH = 1
+        super(sitl_periph_battery_tag, self).configure_env(cfg, env)
+        env.DEFINES.update(
+            HAL_BUILD_AP_PERIPH = 1,
+            PERIPH_FW = 1,
+            CAN_APP_NODE_NAME = '"org.ardupilot.battery_tag"',
+            APJ_BOARD_ID = 101,
+
+            AP_SIM_PARAM_ENABLED = 0,
+            AP_KDECAN_ENABLED = 0,
+            AP_TEMPERATURE_SENSOR_ENABLED = 0,
+            AP_PERIPH_BATTERY_TAG_ENABLED = 1,
+            AP_RTC_ENABLED = 1,
+            AP_PERIPH_RTC_ENABLED = 1,
+            AP_PERIPH_RTC_GLOBALTIME_ENABLED = 1,
+        )
+        
 class esp32(Board):
     abstract = True
     toolchain = 'xtensa-esp32-elf'
