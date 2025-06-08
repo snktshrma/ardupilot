@@ -744,6 +744,53 @@ const AP_Param::GroupInfo NavEKF3::var_info2[] = {
     // @User: Advanced
     AP_GROUPINFO("OPTIONS",  11, NavEKF3, _options, 0),
 
+    // @Group: Lane1
+    // @Path: ../AP_NavEKF/AP_NavEKF3.cpp
+    AP_SUBGROUPVARPTR(lane_cfg[0], "1_", 12, NavEKF3, lane_var_info),
+
+#if MAX_EKF_CORES > 1
+    // @Group: Lane2
+    // @Path: ../AP_NavEKF/AP_NavEKF3.cpp
+    AP_SUBGROUPVARPTR(lane_cfg[1], "2_", 13, NavEKF3, lane_var_info),
+#endif
+#if MAX_EKF_CORES > 2
+    // @Group: Lane3
+    // @Path: ../AP_NavEKF/AP_NavEKF3.cpp
+    AP_SUBGROUPVARPTR(lane_cfg[2], "3_", 14, NavEKF3, lane_var_info),
+#endif
+
+    AP_GROUPEND
+};
+
+const AP_Param::GroupInfo *NavEKF3::lane_var_info[] = {
+    // @Param: GPS
+    // @DisplayName: GPS sensor index
+    // @Description: GPS sensor index used by this lane when affinity is enabled. 0 defaults to lane number.
+    // @Range: 0 3
+    // @User: Advanced
+    AP_GROUPINFO("GPS", 1, NavEKF3::LaneCfg, gps, 0),
+
+    // @Param: BARO
+    // @DisplayName: Barometer sensor index
+    // @Description: Barometer sensor index used by this lane when affinity is enabled. 0 defaults to lane number.
+    // @Range: 0 3
+    // @User: Advanced
+    AP_GROUPINFO("BARO", 2, NavEKF3::LaneCfg, baro, 0),
+
+    // @Param: MAG
+    // @DisplayName: Compass sensor index
+    // @Description: Compass sensor index used by this lane when affinity is enabled. 0 defaults to lane number.
+    // @Range: 0 3
+    // @User: Advanced
+    AP_GROUPINFO("MAG", 3, NavEKF3::LaneCfg, mag, 0),
+
+    // @Param: ARSP
+    // @DisplayName: Airspeed sensor index
+    // @Description: Airspeed sensor index used by this lane when affinity is enabled. 0 defaults to lane number.
+    // @Range: 0 3
+    // @User: Advanced
+    AP_GROUPINFO("ARSP", 4, NavEKF3::LaneCfg, arspd, 0),
+
     AP_GROUPEND
 };
 

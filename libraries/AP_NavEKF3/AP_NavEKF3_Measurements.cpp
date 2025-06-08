@@ -1165,10 +1165,15 @@ void NavEKF3_core::update_gps_selection(void)
     preferred_gps = selected_gps;
 
     if (frontend->_affinity & EKF_AFFINITY_GPS) {
-        if (core_index < gps.num_sensors() ) {
+        uint8_t idx = frontend->lane_cfg[core_index].gps;
+        if (idx == 0) {
+            // use core_index GPS if it is healthy and configured for position
+            idx = core_index;
+        }
+        if (idx < gps.num_sensors() ) {
             // always prefer our core_index, unless we don't have that
             // many GPS sensors available
-            preferred_gps = core_index;
+            preferred_gps = idx;
         }
         if (gps.status(preferred_gps) >= AP_DAL_GPS::GPS_OK_FIX_3D) {
             // select our preferred_gps if it has a 3D fix, otherwise
@@ -1186,11 +1191,16 @@ void NavEKF3_core::update_mag_selection(void)
     const auto &compass = dal.compass();
 
     if (frontend->_affinity & EKF_AFFINITY_MAG) {
-        if (core_index < compass.get_count() &&
-            compass.healthy(core_index) &&
-            compass.use_for_yaw(core_index)) {
+        uint8_t idx = frontend->lane_cfg[core_index].mag;
+        if (idx == 0) {
+            // use core_index compass if it is healthy and configured for yaw
+            idx = core_index;
+        }
+        if (idx < compass.get_count() &&
+            compass.healthy(idx) &&
+            compass.use_for_yaw(idx)) {
             // use core_index compass if it is healthy
-            magSelectIndex = core_index;
+            magSelectIndex = idx;
         }
     } else {
         // if we are not armed, use the primary compass (if it is healthy)
@@ -1212,10 +1222,15 @@ void NavEKF3_core::update_baro_selection(void)
     selected_baro = baro.get_primary();
 
     if (frontend->_affinity & EKF_AFFINITY_BARO) {
-        if (core_index < baro.num_instances() &&
-            baro.healthy(core_index)) {
+        uint8_t idx = frontend->lane_cfg[core_index].baro;
+        if (idx == 0) {
+            // use core_index baro if it is healthy and configured for height
+            idx = core_index;
+        }
+        if (idx < baro.num_instances() &&
+            baro.healthy(idx)) {
             // use core_index baro if it is healthy
-            selected_baro = core_index;
+            selected_baro = idx;
         }
     }
 }
@@ -1234,11 +1249,16 @@ void NavEKF3_core::update_airspeed_selection(void)
     selected_airspeed = arsp->get_primary();
 
     if (frontend->_affinity & EKF_AFFINITY_ARSP) {
-        if (core_index < arsp->get_num_sensors() &&
-            arsp->healthy(core_index) &&
-            arsp->use(core_index)) {
+        uint8_t idx = frontend->lane_cfg[core_index].arspd;
+        if (idx == 0) {
+            // use core_index airspeed if it is healthy and configured for airspeed
+            idx = core_index;
+        }
+        if (idx < arsp->get_num_sensors() &&
+            arsp->healthy(idx) &&
+            arsp->use(idx)) {
             // use core_index airspeed if it is healthy
-            selected_airspeed = core_index;
+            selected_airspeed = idx;
         }
     }
 }

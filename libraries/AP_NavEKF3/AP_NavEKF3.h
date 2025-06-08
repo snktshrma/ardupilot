@@ -464,6 +464,14 @@ private:
         return (_options & (uint32_t)option) != 0;
     }
 
+    struct LaneCfg {
+        AP_Int8 gps; //GPS index for gps lane, -1 for default
+        AP_Int8 baro; //Barometer index for baro lane, -1 for default
+        AP_Int8 mag; //Mag index for mag lane, -1 for default
+        AP_Int8 arspd; //Airspeed index for this lane, -1 for default
+    } lane_cfg[MAX_EKF_CORES];
+
+    static const AP_Param::GroupInfo *lane_var_info[];
 // Possible values for _flowUse
 #define FLOW_USE_NONE    0
 #define FLOW_USE_NAV     1
