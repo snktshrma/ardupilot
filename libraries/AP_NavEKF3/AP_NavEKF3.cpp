@@ -743,7 +743,15 @@ const AP_Param::GroupInfo NavEKF3::var_info2[] = {
     // @Bitmask: 0:JammingExpected, 1: ManualLaneSwitching
     // @User: Advanced
     AP_GROUPINFO("OPTIONS",  11, NavEKF3, _options, 0),
-
+    
+#if AP_TERRAIN_AVAILABLE
+    // @Param: FLOW_USE_DB
+    // @DisplayName: Flow database use bitmask
+    // @Description: Controls how the flow database is used for optical flow estimation with or without a range finder.
+    // @Bitmask: 0: UseFlowDB
+    // @User: Advanced
+    AP_GROUPINFO("FLOW_USE_DB",  12, NavEKF3, _flowUseTerrainDB, 0),
+#endif // AP_TERRAIN_AVAILABLE
     AP_GROUPEND
 };
 

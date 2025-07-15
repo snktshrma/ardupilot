@@ -4,6 +4,9 @@
 #include "AP_NavEKF3_core.h"
 #include <AP_DAL/AP_DAL.h>
 #include <GCS_MAVLink/GCS.h>
+#if AP_TERRAIN_AVAILABLE
+#include <AP_Terrain/AP_Terrain.h>
+#endif // AP_TERRAIN_AVAILABLE
 
 // Check basic filter health metrics and return a consolidated health status
 bool NavEKF3_core::healthy(void) const
@@ -93,6 +96,14 @@ bool NavEKF3_core::getHeightControlLimit(float &height) const
     // only ask for limiting if we are doing optical flow navigation
     if (frontend->sources.useVelXYSource(AP_NavEKF_Source::SourceXY::OPTFLOW, core_index) && (PV_AidingMode == AID_RELATIVE) && flowDataValid) {
         // If are doing optical flow nav, ensure the height above ground is within range finder limits after accounting for vehicle tilt and control errors
+#if AP_TERRAIN_AVAILABLE
+        if (frontend->_flowUseTerrainDB & (1<<0)) {
+            const auto *terrain = AP_Terrain::get_singleton();
+            if (terrain != nullptr && terrain->enabled()) {
+                return false;
+            }
+        }
+#endif
 #if AP_RANGEFINDER_ENABLED
         const auto *_rng = dal.rangefinder();
         if (_rng == nullptr) {
@@ -109,7 +120,7 @@ bool NavEKF3_core::getHeightControlLimit(float &height) const
         }
         return true;
     } else {
-        return false;
+        return false; // no height limiting required
     }
 }
 

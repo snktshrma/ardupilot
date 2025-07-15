@@ -9,6 +9,10 @@
 #include <GCS_MAVLink/GCS.h>
 #include <AP_DAL/AP_DAL.h>
 
+#if AP_TERRAIN_AVAILABLE
+#include <AP_Terrain/AP_Terrain.h>
+#endif // AP_TERRAIN_AVAILABLE
+
 /********************************************************
 *                   RESET FUNCTIONS                     *
 ********************************************************/
@@ -35,6 +39,13 @@ void NavEKF3_core::SelectFlowFusion()
     // Check for data at the fusion time horizon
     const bool flowDataToFuse = storedOF.recall(ofDataDelayed, imuDataDelayed.time_ms);
 
+#if AP_TERRAIN_AVAILABLE
+    // Check if terrain database can be used for optical flow fusion
+    if ((frontend->_flowUseTerrainDB & (1<<0)) != 0) {
+        AP_Terrain *terrain = AP_Terrain::get_singleton();
+        terrainUseValid = (terrain != nullptr && terrain->enabled());
+    }
+#endif
     // Perform Data Checks
     // Check if the optical flow data is still valid
     flowDataValid = ((imuSampleTime_ms - flowValidMeaTime_ms) < 1000);
@@ -308,11 +319,23 @@ void NavEKF3_core::FuseOptFlow(const of_elements &ofDataDelayed, bool really_fus
         Vector3F posOffsetEarth = prevTnb.mul_transpose(posOffsetBody);
         range -= posOffsetEarth.z / prevTnb.c.z;
     }
-    
+
 #if APM_BUILD_TYPE(APM_BUILD_Rover)
     // override with user specified height (if given, for rover)
     if (ofDataDelayed.heightOverride > 0) {
         range = ofDataDelayed.heightOverride;
+    }
+#endif
+
+#if AP_TERRAIN_AVAILABLE
+    // if terrain is available, use the terrain height estimate to correct the range
+    if (((frontend->_flowUseTerrainDB & (1<<0)) != 0)) {
+        // get the terrain height estimate
+        float terr_alt = 0.0f;
+        AP_Terrain *terrain = AP_Terrain::get_singleton();
+        if ((terrain != nullptr) && terrain->enabled() && terrain->height_above_terrain(terr_alt, true)) {
+            range = terr_alt;
+        }
     }
 #endif
 
