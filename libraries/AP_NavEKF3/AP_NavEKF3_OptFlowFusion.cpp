@@ -9,6 +9,10 @@
 #include <GCS_MAVLink/GCS.h>
 #include <AP_DAL/AP_DAL.h>
 
+#if AP_TERRAIN_AVAILABLE
+#include <AP_Terrain/AP_Terrain.h>
+#endif // AP_TERRAIN_AVAILABLE
+
 /********************************************************
 *                   RESET FUNCTIONS                     *
 ********************************************************/
@@ -313,6 +317,15 @@ void NavEKF3_core::FuseOptFlow(const of_elements &ofDataDelayed, bool really_fus
     // override with user specified height (if given, for rover)
     if (ofDataDelayed.heightOverride > 0) {
         range = ofDataDelayed.heightOverride;
+    }
+#endif
+
+#if AP_TERRAIN_AVAILABLE
+    // if terrain is available, use the terrain height estimate to correct the range
+    float terr_alt = 0.0f;
+    AP_Terrain *terrain = AP_Terrain::get_singleton();
+    if ((terrain != nullptr) && terrain->enabled() && terrain->height_above_terrain(terr_alt, true)) {
+        range = terr_alt;
     }
 #endif
 
