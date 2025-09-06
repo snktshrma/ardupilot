@@ -7807,6 +7807,7 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
             self.InertialLabsEAHRS,
             self.GpsSensorPreArmEAHRS,
             self.Deadreckoning,
+            self.DeadreckoningNoAirSpeed,
             self.EKFlaneswitch,
             self.AirspeedDrivers,
             self.RTL_CLIMB_MIN,
@@ -7905,7 +7906,6 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
     def tests1c(self):
         '''kind of reserved for flapping tests which we still have hopes for'''
         return [
-            self.DeadreckoningNoAirSpeed,
         ]
 
     def disabled_tests(self):
