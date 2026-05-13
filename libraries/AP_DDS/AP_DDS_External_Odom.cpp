@@ -5,8 +5,9 @@
 
 #if AP_DDS_VISUALODOM_ENABLED
 
+#include <AP_HAL/AP_HAL.h>
 #include <AP_VisualOdom/AP_VisualOdom.h>
-#include <GCS_MAVLink/GCS.h>
+// #include <GCS_MAVLink/GCS.h>
 
 void AP_DDS_External_Odom::handle_external_odom(const tf2_msgs_msg_TFMessage& msg)
 {
@@ -39,7 +40,7 @@ void AP_DDS_External_Odom::handle_external_odom(const tf2_msgs_msg_TFMessage& ms
         // Thus, there will not be any resets.
         const uint8_t reset_counter {0};
         // TODO implement jitter correction similar to GCS_MAVLINK::correct_offboard_timestamp_usec_to_ms(remote_time_us, sizeof(msg));
-        const uint32_t time_ms {static_cast<uint32_t>(remote_time_us * 1E-3)};
+        const uint32_t time_ms {AP_HAL::millis()};
         visual_odom->handle_pose_estimate(remote_time_us, time_ms, ap_position.x, ap_position.y, ap_position.z, ap_rotation, posErr, angErr, reset_counter, 0);
 
     }

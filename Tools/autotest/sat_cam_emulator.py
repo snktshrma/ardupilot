@@ -70,6 +70,21 @@ class FpsMeter:
         return self.last_fps
 
 
+def sim_state_lat_lon_deg(msg) -> tuple[float, float]:
+    """Decode SIM_STATE lat/lon: prefer lat_int/lon_int; else float fields (ArduPilot may scale by 1e7)."""
+    lat_i = int(getattr(msg, "lat_int", 0) or 0)
+    lon_i = int(getattr(msg, "lon_int", 0) or 0)
+    if lat_i != 0 and lon_i != 0:
+        return lat_i / 1.0e7, lon_i / 1.0e7
+    la = float(msg.lat)
+    lo = float(msg.lon)
+    if abs(la) > 90.0:
+        la /= 1.0e7
+    if abs(lo) > 180.0:
+        lo /= 1.0e7
+    return la, lo
+
+
 def ned_vel_to_mosaic_uv_rate(lat_deg: float, zoom: int, vel_n: float, vel_e: float) -> tuple[float, float]:
     """Map NED north/east (m/s) to mosaic pixel rates (u east, v south)."""
     mpp = meters_per_pixel_at_zoom(lat_deg, zoom)
@@ -290,8 +305,12 @@ def draw_fps_overlay(frame, out_fps: float, cap_fps: float) -> None:
 
 
 class MAVLinkConnection:
-    def __init__(self, port=14550):
+    def __init__(self, port: int = 14550, pose_source: str = "sim", sim_view_agl_m: float = 30.0):
         self.port = port
+        self.pose_source = str(pose_source).strip().lower()
+        if self.pose_source not in ("sim", "ekf"):
+            raise ValueError(f"pose_source must be sim or ekf, got {pose_source!r}")
+        self.sim_view_agl_m = max(0.5, float(sim_view_agl_m))
         self.connection = None
         self.lat = 0.0
         self.lon = 0.0
@@ -305,7 +324,7 @@ class MAVLinkConnection:
         self.has_fix = False
 
     async def connect(self, position_stream_hz: int = 20):
-        """Wait for heartbeat, then MAV_CMD_SET_MESSAGE_INTERVAL for position and attitude (Hz clamped 2-50)."""
+        """Wait for heartbeat, then MAV_CMD_SET_MESSAGE_INTERVAL for pose stream (Hz clamped 2-50)."""
         url = f"udp:127.0.0.1:{self.port}"
         print(f"[MAVLink] Connecting to {url}...")
         self.connection = mavutil.mavlink_connection(url)
@@ -321,7 +340,11 @@ class MAVLinkConnection:
         hz = max(2, min(50, int(position_stream_hz)))
         interval_us = max(1, int(1_000_000.0 / float(hz)))
         cmd = mavutil.mavlink.MAV_CMD_SET_MESSAGE_INTERVAL
-        for msg_name in ("GLOBAL_POSITION_INT", "LOCAL_POSITION_NED", "ATTITUDE"):
+        if self.pose_source == "sim":
+            msg_names = ("SIM_STATE",)
+        else:
+            msg_names = ("GLOBAL_POSITION_INT", "LOCAL_POSITION_NED", "ATTITUDE")
+        for msg_name in msg_names:
             mid = getattr(mavutil.mavlink, f"MAVLINK_MSG_ID_{msg_name}")
             self.connection.mav.command_long_send(
                 tsys,
@@ -337,8 +360,8 @@ class MAVLinkConnection:
                 0.0,
             )
         print(
-            f"[MAVLink] SET_MESSAGE_INTERVAL {hz} Hz ({interval_us} us) for "
-            "GLOBAL_POSITION_INT, LOCAL_POSITION_NED, and ATTITUDE",
+            f"[MAVLink] SET_MESSAGE_INTERVAL {hz} Hz ({interval_us} us) for {', '.join(msg_names)} "
+            f"(pose_source={self.pose_source})",
             flush=True,
         )
 
@@ -353,6 +376,24 @@ class MAVLinkConnection:
 
     def _handle_message(self, msg):
         msg_type = msg.get_type()
+
+        if self.pose_source == "sim" and msg_type in (
+            "GLOBAL_POSITION_INT",
+            "LOCAL_POSITION_NED",
+            "ATTITUDE",
+        ):
+            return
+
+        if msg_type == "SIM_STATE" and self.pose_source == "sim":
+            self.lat, self.lon = sim_state_lat_lon_deg(msg)
+            self.alt = self.sim_view_agl_m
+            self.vel_n = float(msg.vn)
+            self.vel_e = float(msg.ve)
+            self.vel_up = -float(msg.vd)
+            self.heading = math.degrees(float(msg.yaw)) % 360.0
+            self.has_fix = True
+            self.last_update = time.time()
+            return
 
         if msg_type == "GLOBAL_POSITION_INT":
             self.lat = msg.lat / 1e7
@@ -860,7 +901,7 @@ async def airfield_build_task(mavlink, fetcher, opts, resolution, composer_box, 
     progress["current"] = 0
     progress["total"] = 0
     progress["tiles_ok"] = 0
-    print("[Airfield] Waiting for GPS fix to anchor mosaic...", flush=True)
+    print("[Airfield] Waiting for position fix to anchor mosaic (GPS or SIM_STATE)...", flush=True)
     while True:
         mavlink.drain()
         if mavlink.has_fix and not mavlink.is_stale():
@@ -922,11 +963,20 @@ async def airfield_build_task(mavlink, fetcher, opts, resolution, composer_box, 
         float(opts.min_view_alt_m),
         show_hud=not opts.no_hud,
     )
-    print(
-        "[Airfield] View: footprint from MAV rel AGL (>= 0), "
-        f"optional floor {opts.min_view_alt_m}m via --min-view-alt-m; "
-        "HUD shows MAVLink relative altitude."
-    )
+    if opts.pose_source == "sim":
+        print(
+            "[Airfield] View: lat/lon/heading from SIM_STATE (SITL truth); footprint AGL from "
+            f"--sim-view-agl-m ({opts.sim_view_agl_m:.1f} m); "
+            f"floor {opts.min_view_alt_m}m via --min-view-alt-m.",
+            flush=True,
+        )
+    else:
+        print(
+            "[Airfield] View: footprint from MAV rel AGL (>= 0), "
+            f"optional floor {opts.min_view_alt_m}m via --min-view-alt-m; "
+            "HUD shows MAVLink relative altitude.",
+            flush=True,
+        )
 
 
 async def main_async(opts):
@@ -978,7 +1028,9 @@ async def main_async(opts):
             + (f" jpeg_q={ROS_JPEG_QUALITY}" if opts.ros_compressed else "")
             + " qos=sensor_data"
         )
-    print(f"[Config] mode: fixed airfield (mosaic + sliding viewport)")
+    print(f"[Config] pose-source: {opts.pose_source}")
+    if opts.pose_source == "sim":
+        print(f"[Config] sim-view-agl-m: {opts.sim_view_agl_m} (camera footprint; SIM_STATE.alt is MSL)")
 
     ros_pub = None
     if opts.ros:
@@ -994,7 +1046,11 @@ async def main_async(opts):
             print(f"ERROR: {exc}")
             return 1
 
-    mavlink = MAVLinkConnection(port=opts.port)
+    mavlink = MAVLinkConnection(
+        port=opts.port,
+        pose_source=opts.pose_source,
+        sim_view_agl_m=float(opts.sim_view_agl_m),
+    )
     fetcher = TileFetcher(api_key=api_key)
     placeholder = NoFixPlaceholder(resolution=resolution)
     airfield_progress = {}
@@ -1063,29 +1119,44 @@ def main():
         description="Satellite camera emulator for ArduPilot SITL: fixed airfield Mapbox mosaic + sliding viewport.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-After the first GPS fix, Mapbox tiles are stitched into one mosaic, then a sliding viewport
-warps that image at the output rate. Ground footprint uses max(--min-view-alt-m, MAV rel AGL).
+After the first position fix (GPS or SIM_STATE), Mapbox tiles are stitched into one mosaic, then a sliding viewport
+warps that image at the output rate. Ground footprint uses max(--min-view-alt-m, AGL). With --pose-source sim,
+AGL for the camera footprint is --sim-view-agl-m (SIM_STATE.alt is MSL, not height above ground).
 
 Examples:
   python3 sat_cam_emulator.py --port 14550
+  python3 sat_cam_emulator.py --port 14550 --pose-source ekf
   python3 sat_cam_emulator.py --airfield-radius-m 1500 --airfield-zoom 19
   python3 sat_cam_emulator.py --airfield-cache-dir /tmp/my_af --airfield-save-cache
   python3 sat_cam_emulator.py --airfield-reuse-cache --airfield-cache-dir /tmp/my_af
 
-NGPS / ROS 2 (DDS): direct publish (same composed frames as the preview loop):
+NGPS / ROS 2 (DDS): use SITL ground truth so the camera does not chase EKF fed by NGPS (loopback):
     source /opt/ros/humble/setup.bash
-    python3 sat_cam_emulator.py --port 14550 --fps 30 --ros --no-hud --no-display
+    python3 sat_cam_emulator.py --port 14550 --fps 30 --ros --no-hud --no-display --pose-source sim
     python3 sat_cam_emulator.py --port 14550 --fps 30 --ros --ros-compressed --ros-size 640x360 --no-hud --no-display
 
 Legacy MJPEG + ap_ngps_ros2 bridge (optional browser preview):
     python3 sat_cam_emulator.py --port 14550 --http-mjpeg-port 8090 --fps 30 --no-hud --no-display
     ros2 launch ap_ngps_ros2 mjpeg_sat_cam_bridge.launch.py mjpeg_url:=http://127.0.0.1:8090/video
 
-Tune --fps for output rate; first mosaic build needs a valid GPS fix from SITL.
+Tune --fps for output rate; first mosaic build needs a valid position (GPS fix or SIM_STATE in SITL).
 """,
     )
 
     parser.add_argument("--port", type=int, default=14550, help="MAVLink UDP listen port (default: 14550)")
+    parser.add_argument(
+        "--pose-source",
+        choices=("sim", "ekf"),
+        default="sim",
+        help="sim: SITL truth from MAVLink SIM_STATE (avoids EKF/NGPS loopback on lat/lon). "
+        "ekf: GLOBAL_POSITION_INT + LOCAL_POSITION_NED + ATTITUDE (legacy).",
+    )
+    parser.add_argument(
+        "--sim-view-agl-m",
+        type=float,
+        default=30.0,
+        help="With pose-source=sim, AGL (m) used only for satellite footprint sizing (SIM_STATE.alt is MSL). Default: 30",
+    )
     parser.add_argument("--http-mjpeg-port", type=int, default=0, help="MJPEG TCP port, 0=off (binds 127.0.0.1)")
     parser.add_argument("--resolution", default="1280x720", help="Camera WxH (default: 1280x720)")
     parser.add_argument(
