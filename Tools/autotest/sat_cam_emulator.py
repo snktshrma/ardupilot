@@ -322,6 +322,9 @@ class MAVLinkConnection:
         self.last_update = 0.0
         self.last_local_alt_t = 0.0
         self.has_fix = False
+        self._sim_msl_ref: float | None = None
+        self._home_msl_m: float | None = None
+        self._home_alt_logged = False
 
     async def connect(self, position_stream_hz: int = 20):
         """Wait for heartbeat, then MAV_CMD_SET_MESSAGE_INTERVAL for pose stream (Hz clamped 2-50)."""
@@ -341,7 +344,7 @@ class MAVLinkConnection:
         interval_us = max(1, int(1_000_000.0 / float(hz)))
         cmd = mavutil.mavlink.MAV_CMD_SET_MESSAGE_INTERVAL
         if self.pose_source == "sim":
-            msg_names = ("SIM_STATE",)
+            msg_names = ("SIM_STATE", "HOME_POSITION")
         else:
             msg_names = ("GLOBAL_POSITION_INT", "LOCAL_POSITION_NED", "ATTITUDE")
         for msg_name in msg_names:
@@ -364,6 +367,21 @@ class MAVLinkConnection:
             f"(pose_source={self.pose_source})",
             flush=True,
         )
+        if self.pose_source == "sim":
+            self.connection.mav.command_long_send(
+                tsys,
+                tcomp,
+                mavutil.mavlink.MAV_CMD_GET_HOME_POSITION,
+                0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+            )
+            print("[MAVLink] MAV_CMD_GET_HOME_POSITION (HOME_POSITION.altitude MSL for sim alt)", flush=True)
 
     def drain(self):
         if self.connection is None:
@@ -384,9 +402,28 @@ class MAVLinkConnection:
         ):
             return
 
+        if msg_type == "HOME_POSITION":
+            self._home_msl_m = float(msg.altitude) / 1000.0
+            if self.pose_source == "sim" and not self._home_alt_logged:
+                print(
+                    f"[MAVLink] HOME_POSITION home MSL={self._home_msl_m:.2f} m (sim alt = vehicle MSL - home MSL)",
+                    flush=True,
+                )
+                self._home_alt_logged = True
+            return
+
         if msg_type == "SIM_STATE" and self.pose_source == "sim":
             self.lat, self.lon = sim_state_lat_lon_deg(msg)
-            self.alt = self.sim_view_agl_m
+            msl = float(msg.alt)
+            fu = int(getattr(msg, "fields_updated", 0) or 0)
+            if fu & (1 << 31):
+                self._sim_msl_ref = None
+            if self._home_msl_m is not None:
+                self.alt = max(0.0, msl - self._home_msl_m)
+            else:
+                if self._sim_msl_ref is None:
+                    self._sim_msl_ref = msl - self.sim_view_agl_m
+                self.alt = max(0.0, msl - self._sim_msl_ref)
             self.vel_n = float(msg.vn)
             self.vel_e = float(msg.ve)
             self.vel_up = -float(msg.vd)
@@ -680,7 +717,7 @@ class AirfieldSlidingComposer:
         cv2.putText(frame, f"Lon: {lon:.6f}", (20, y0 + 42), font, 0.5, col, 1)
         cv2.putText(
             frame,
-            f"Alt: {altitude_m:.2f}m (MAV rel)  HDG: {heading:.0f}",
+            f"Alt: {altitude_m:.2f}m (view)  HDG: {heading:.0f}",
             (20, y0 + 62),
             font,
             0.45,
@@ -965,9 +1002,10 @@ async def airfield_build_task(mavlink, fetcher, opts, resolution, composer_box, 
     )
     if opts.pose_source == "sim":
         print(
-            "[Airfield] View: lat/lon/heading from SIM_STATE (SITL truth); footprint AGL from "
-            f"--sim-view-agl-m ({opts.sim_view_agl_m:.1f} m); "
-            f"floor {opts.min_view_alt_m}m via --min-view-alt-m.",
+            "[Airfield] View: lat/lon/heading from SIM_STATE (SITL truth); altitude = vehicle MSL (SIM_STATE.alt) "
+            "minus home MSL (HOME_POSITION.altitude from MAV_CMD_GET_HOME_POSITION / stream). "
+            f"Until home arrives, first-sample MSL anchor ~= --sim-view-agl-m ({opts.sim_view_agl_m:.1f} m). "
+            f"Floor {opts.min_view_alt_m}m via --min-view-alt-m.",
             flush=True,
         )
     else:
@@ -1030,7 +1068,10 @@ async def main_async(opts):
         )
     print(f"[Config] pose-source: {opts.pose_source}")
     if opts.pose_source == "sim":
-        print(f"[Config] sim-view-agl-m: {opts.sim_view_agl_m} (camera footprint; SIM_STATE.alt is MSL)")
+        print(
+            f"[Config] sim-view-agl-m: {opts.sim_view_agl_m} "
+            "(fallback MSL anchor until HOME_POSITION; not used once home MSL is known)"
+        )
 
     ros_pub = None
     if opts.ros:
@@ -1121,7 +1162,8 @@ def main():
         epilog="""
 After the first position fix (GPS or SIM_STATE), Mapbox tiles are stitched into one mosaic, then a sliding viewport
 warps that image at the output rate. Ground footprint uses max(--min-view-alt-m, AGL). With --pose-source sim,
-AGL for the camera footprint is --sim-view-agl-m (SIM_STATE.alt is MSL, not height above ground).
+altitude for the view is SIM_STATE.alt (vehicle MSL) minus HOME_POSITION.altitude (home MSL), requested over MAVLink;
+until HOME_POSITION arrives, a first-sample MSL anchor matches --sim-view-agl-m. LOCAL_POSITION_NED is not used for sim alt.
 
 Examples:
   python3 sat_cam_emulator.py --port 14550
@@ -1155,7 +1197,8 @@ Tune --fps for output rate; first mosaic build needs a valid position (GPS fix o
         "--sim-view-agl-m",
         type=float,
         default=30.0,
-        help="With pose-source=sim, AGL (m) used only for satellite footprint sizing (SIM_STATE.alt is MSL). Default: 30",
+        help="With pose-source=sim: until HOME_POSITION is received, first SIM_STATE.alt (MSL) minus this value "
+        "anchors initial view height (m). With home MSL from MAVLink, alt is vehicle MSL minus home MSL. Default: 30",
     )
     parser.add_argument("--http-mjpeg-port", type=int, default=0, help="MJPEG TCP port, 0=off (binds 127.0.0.1)")
     parser.add_argument("--resolution", default="1280x720", help="Camera WxH (default: 1280x720)")
