@@ -327,6 +327,8 @@ class MAVProxyLaunch:
             shell=True,
             output="both",
             respawn=False,
+            # keep the output so that tests can assert on what the GCS was shown
+            cached_output=True,
         )
         return mavproxy_process
 
