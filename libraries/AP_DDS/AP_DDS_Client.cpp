@@ -93,6 +93,9 @@ static constexpr uint16_t DELAY_STATUS_TOPIC_MS = AP_DDS_DELAY_STATUS_TOPIC_MS;
 // Define the subscriber data members, which are static class scope.
 // If these are created on the stack in the subscriber,
 // the AP_DDS_Client::on_topic frame size is exceeded.
+#if AP_DDS_STATUSTEXT_SUB_ENABLED
+ardupilot_msgs_msg_StatusText AP_DDS_Client::rx_statustext_topic {};
+#endif // AP_DDS_STATUSTEXT_SUB_ENABLED
 #if AP_DDS_JOY_SUB_ENABLED
 sensor_msgs_msg_Joy AP_DDS_Client::rx_joy_topic {};
 #endif // AP_DDS_JOY_SUB_ENABLED
@@ -803,6 +806,28 @@ void AP_DDS_Client::on_topic(uxrSession* uxr_session, uxrObjectId object_id, uin
     (void) stream_id;
     (void) length;
     switch (object_id.id) {
+#if AP_DDS_STATUSTEXT_SUB_ENABLED
+    case topics[to_underlying(TopicIndex::STATUSTEXT_SUB)].dr_id.id: {
+        const bool success = ardupilot_msgs_msg_StatusText_deserialize_topic(ub, &rx_statustext_topic);
+
+        if (success == false) {
+            break;
+        }
+
+        // the text arrives from the network, so do not trust it to be terminated
+        rx_statustext_topic.text[ARRAY_SIZE(rx_statustext_topic.text) - 1] = '\0';
+        if (strlen(rx_statustext_topic.text) == 0) {
+            break;
+        }
+
+        // report anything outside MAV_SEVERITY as info rather than dropping it
+        const MAV_SEVERITY severity = rx_statustext_topic.severity > MAV_SEVERITY_DEBUG ?
+                                      MAV_SEVERITY_INFO : MAV_SEVERITY(rx_statustext_topic.severity);
+        // the prefix keeps external text apart from the messages the flight code sends itself
+        GCS_SEND_TEXT(severity, "%s %s", msg_prefix, rx_statustext_topic.text);
+        break;
+    }
+#endif // AP_DDS_STATUSTEXT_SUB_ENABLED
 #if AP_DDS_JOY_SUB_ENABLED
     case topics[to_underlying(TopicIndex::JOY_SUB)].dr_id.id: {
         const bool success = sensor_msgs_msg_Joy_deserialize_topic(ub, &rx_joy_topic);
