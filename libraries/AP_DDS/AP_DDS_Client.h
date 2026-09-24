@@ -32,6 +32,9 @@
 #if AP_DDS_STATUS_PUB_ENABLED
 #include "ardupilot_msgs/msg/Status.h"
 #endif // AP_DDS_STATUS_PUB_ENABLED
+#if AP_DDS_STATUSTEXT_SUB_ENABLED
+#include "ardupilot_msgs/msg/StatusText.h"
+#endif // AP_DDS_STATUSTEXT_SUB_ENABLED
 #if AP_DDS_JOY_SUB_ENABLED
 #include "sensor_msgs/msg/Joy.h"
 #endif // AP_DDS_JOY_SUB_ENABLED
@@ -248,6 +251,10 @@ private:
     static void populate_static_transforms(tf2_msgs_msg_TFMessage& msg);
 #endif // AP_DDS_STATIC_TF_PUB_ENABLED
 
+#if AP_DDS_STATUSTEXT_SUB_ENABLED
+    // incoming text to forward to the GCS
+    static ardupilot_msgs_msg_StatusText rx_statustext_topic;
+#endif // AP_DDS_STATUSTEXT_SUB_ENABLED
 #if AP_DDS_JOY_SUB_ENABLED
     // incoming joystick data
     static sensor_msgs_msg_Joy rx_joy_topic;

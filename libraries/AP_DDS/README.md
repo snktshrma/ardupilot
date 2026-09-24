@@ -184,6 +184,7 @@ Subscribed topics:
  * /ap/cmd_gps_pose [ardupilot_msgs/msg/GlobalPosition] 1 subscriber
  * /ap/cmd_vel [geometry_msgs/msg/TwistStamped] 1 subscriber
  * /ap/joy [sensor_msgs/msg/Joy] 1 subscriber
+ * /ap/statustext [ardupilot_msgs/msg/StatusText] 1 subscriber
  * /ap/tf [tf2_msgs/msg/TFMessage] 1 subscriber
  * /clock [rosgraph_msgs/msg/Clock] 1 subscriber
 ```
@@ -280,6 +281,31 @@ requester: making request: ardupilot_msgs.srv.Takeoff_Request(alt=10.5)
 response:
 ardupilot_msgs.srv.Takeoff_Response(status=True)
 ```
+
+## Status text
+
+A ROS 2 node can display text on the ground control station. Text published to
+`/ap/statustext` (type `ardupilot_msgs/msg/StatusText`) is sent to every
+connected GCS as a MAVLink `STATUSTEXT`, prefixed with `DDS:` so that it stays
+distinguishable from the messages ArduPilot sends itself.
+
+```bash
+ros2 topic pub --once /ap/statustext ardupilot_msgs/msg/StatusText "{severity: 6, text: 'hello from ROS 2'}"
+```
+
+The ground station then shows `DDS: hello from ROS 2`.
+
+The `severity` field takes `MAV_SEVERITY` values, where the default of zero
+means `EMERGENCY`, so it is worth setting. Any value above `DEBUG` is reported
+as `INFO`.
+
+Text longer than the 50 character MAVLink field is split over several
+`STATUSTEXT` messages, but there are two limits on how much gets through:
+
+* text over 255 bytes exceeds the DDS buffer, and the whole message is
+  dropped without reaching the GCS;
+* the GCS send buffer holds 256 characters including the `DDS: ` prefix, so
+  anything past 251 characters of text is truncated.
 
 ## Commanding using ROS 2 Topics
 

@@ -86,6 +86,11 @@
 #define AP_DDS_STATUS_PUB_ENABLED 1
 #endif
 
+// Whether text published by ROS 2 nodes is forwarded to the GCS
+#ifndef AP_DDS_STATUSTEXT_SUB_ENABLED
+#define AP_DDS_STATUSTEXT_SUB_ENABLED 1
+#endif
+
 #ifndef AP_DDS_JOY_SUB_ENABLED
 #define AP_DDS_JOY_SUB_ENABLED 1
 #endif

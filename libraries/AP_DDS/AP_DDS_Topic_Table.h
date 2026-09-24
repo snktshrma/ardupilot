@@ -62,6 +62,9 @@ enum class TopicIndex: uint8_t {
 #if AP_DDS_STATUS_PUB_ENABLED
     STATUS_PUB,
 #endif // AP_DDS_STATUS_PUB_ENABLED
+#if AP_DDS_STATUSTEXT_SUB_ENABLED
+    STATUSTEXT_SUB,
+#endif // AP_DDS_STATUSTEXT_SUB_ENABLED
 #if AP_DDS_JOY_SUB_ENABLED
     JOY_SUB,
 #endif // AP_DDS_JOY_SUB_ENABLED
@@ -354,6 +357,25 @@ constexpr struct AP_DDS_Client::Topic_table AP_DDS_Client::topics[] = {
         },
     },
 #endif // AP_DDS_STATUS_PUB_ENABLED
+#if AP_DDS_STATUSTEXT_SUB_ENABLED
+    {
+        .topic_id = to_underlying(TopicIndex::STATUSTEXT_SUB),
+        .pub_id = to_underlying(TopicIndex::STATUSTEXT_SUB),
+        .sub_id = to_underlying(TopicIndex::STATUSTEXT_SUB),
+        .dw_id = uxrObjectId{.id=to_underlying(TopicIndex::STATUSTEXT_SUB), .type=UXR_DATAWRITER_ID},
+        .dr_id = uxrObjectId{.id=to_underlying(TopicIndex::STATUSTEXT_SUB), .type=UXR_DATAREADER_ID},
+        .topic_rw = Topic_rw::DataReader,
+        .topic_name = "statustext",
+        .type_name = "ardupilot_msgs::msg::dds_::StatusText_",
+        .qos = {
+            .durability = UXR_DURABILITY_VOLATILE,
+            // text is not periodic, so it must not be dropped in transit
+            .reliability = UXR_RELIABILITY_RELIABLE,
+            .history = UXR_HISTORY_KEEP_LAST,
+            .depth = 5,
+        },
+    },
+#endif // AP_DDS_STATUSTEXT_SUB_ENABLED
 #if AP_DDS_JOY_SUB_ENABLED
     {
         .topic_id = to_underlying(TopicIndex::JOY_SUB),
